@@ -17,6 +17,7 @@ import { clearAllCache } from '../utils/cache';
 import { UI, TEXT, GLASS } from '../constants/colors';
 import { SUPPORTED_LANGUAGES, getLanguageMeta } from '../constants/quotes';
 import { requestNotificationPermission, cancelAllNotifications } from '../utils/notifications';
+import { adsAvailable, getAdsDebugInfo, maybeShowShareInterstitial } from '../ads/AdService';
 
 const SectionHeader = ({ title }) => (
   <Text style={styles.sectionHeader}>{title}</Text>
@@ -221,6 +222,50 @@ const SettingsScreen = ({ navigation }) => {
               </View>
             )}
           </View>
+
+          {/* ── Dev / Ad Testing (only visible in __DEV__) ── */}
+          {__DEV__ && (
+            <>
+              <SectionHeader title="🛠 Ad Testing (Dev Only)" />
+              <View style={styles.card}>
+                <SettingsRow
+                  icon="play-circle-outline"
+                  label="Force Interstitial Ad"
+                  subtitle="Bypasses rate limit — shows test ad immediately"
+                  onPress={async () => {
+                    if (!adsAvailable()) {
+                      Alert.alert(
+                        'Ads not available',
+                        'Running in Expo Go or AdMob native module not loaded.\n\nBuild a development client to test ads:\nnpx eas build --profile development --platform android'
+                      );
+                      return;
+                    }
+                    const shown = await maybeShowShareInterstitial(true);
+                    if (!shown) Alert.alert('Ad not ready', 'Interstitial not loaded yet — wait a few seconds and try again.');
+                  }}
+                />
+                <SettingsRow
+                  icon="information-circle-outline"
+                  label="Ad Status"
+                  subtitle="Check SDK state and share counter"
+                  isLast
+                  onPress={async () => {
+                    const info = await getAdsDebugInfo();
+                    Alert.alert(
+                      'Ad Debug Info',
+                      `Available: ${info.available}\n` +
+                      `Initialized: ${info.initialized}\n` +
+                      `Interstitial ready: ${info.interstitialReady}\n` +
+                      `Using test IDs: ${info.useTestAds}\n` +
+                      `Share count: ${info.shareCount}\n` +
+                      `Next ad on share #: ${info.nextOnShare}\n` +
+                      `Last shown: ${info.lastShownAt ? new Date(info.lastShownAt).toLocaleTimeString() : 'never'}`
+                    );
+                  }}
+                />
+              </View>
+            </>
+          )}
 
           {/* Data */}
           <SectionHeader title="Data" />
