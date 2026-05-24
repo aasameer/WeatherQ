@@ -34,8 +34,34 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
-## Upcoming — v1.1.0
-- More share card templates (feature/share-card-templates)
+## [1.2.0] — 2026-05-21
+
+### Added
+- Background weather refresh — `expo-background-fetch` task wakes up
+  every ~12 h to fetch fresh weather + quote and reschedule notifications.
+  Notifications no longer show stale "yesterday's weather".
+- iOS `UIBackgroundModes` + `BGTaskSchedulerPermittedIdentifiers` registered.
+- "Powered by DDP Development" branding on About screen, privacy policy
+  and landing page.
+
+### Changed
+- Copyright: © 2026 DDP Development (was generic "WeatherQ").
+- About screen version bumped to 1.2.0 with DDP byline.
+
+---
+
+## [1.1.0] — 2026-05-21
+
+### Added
+- 4 share card templates with visual picker:
+  Weather (dynamic), Midnight, Sunset, Ocean
+- Horizontal template chips with gradient swatch + emoji + active dot
+- Each template defines its own gradient, text, quote box, stat colors
+- RTL Arabic quote support already preserved across all templates
+
+---
+
+## Upcoming — v1.3.0
 - Saved favourite quotes
 - Hourly forecast strip
 - Air Quality Index

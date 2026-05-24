@@ -8,6 +8,7 @@ import { SettingsProvider } from './src/context/SettingsContext';
 import AppNavigator         from './src/navigation/AppNavigator';
 import SplashAnimatedScreen from './src/screens/SplashScreen';
 import { initAds }          from './src/ads/AdService';
+import { registerDailyRefreshTask } from './src/utils/backgroundTasks';
 
 // Keep the native splash visible until we're ready
 SplashScreen.preventAutoHideAsync();
@@ -22,8 +23,9 @@ export default function App() {
   }, [nativeReady]);
 
   useEffect(() => {
-    // Fire-and-forget — ad SDK self-no-ops if running in Expo Go
+    // Fire-and-forget — both self-no-op safely when running in Expo Go
     initAds();
+    registerDailyRefreshTask();
     setNativeReady(true);
   }, []);
 
