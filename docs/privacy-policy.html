@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — WeatherQ</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0D1B3E;
+      color: #E2E8F0;
+      line-height: 1.75;
+      padding: 0 16px 60px;
+    }
+    header {
+      background: linear-gradient(135deg, #0D1B3E, #0A2463);
+      padding: 48px 24px 36px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    header .logo { font-size: 40px; margin-bottom: 12px; }
+    header h1 { font-size: 28px; font-weight: 700; color: #fff; }
+    header p  { font-size: 14px; color: rgba(255,255,255,0.55); margin-top: 6px; }
+    .container { max-width: 720px; margin: 48px auto 0; }
+    h2 {
+      font-size: 18px; font-weight: 700; color: #63B3ED;
+      margin: 40px 0 12px; padding-bottom: 8px;
+      border-bottom: 1px solid rgba(99,179,237,0.2);
+    }
+    p  { margin-bottom: 14px; color: #CBD5E0; font-size: 15px; }
+    ul { margin: 0 0 14px 20px; color: #CBD5E0; font-size: 15px; }
+    li { margin-bottom: 6px; }
+    a  { color: #63B3ED; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 14px;
+    }
+    .card-title { font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 6px; }
+    .tag {
+      display: inline-block;
+      background: rgba(99,179,237,0.15);
+      color: #63B3ED;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .tag.green { background: rgba(72,187,120,0.15); color: #68D391; }
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      color: rgba(255,255,255,0.3);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⛅</div>
+  <h1>Privacy Policy</h1>
+  <p>WeatherQ by DDP Development &nbsp;·&nbsp; Last updated: May 21, 2026</p>
+</header>
+
+<div class="container">
+
+  <p>
+    WeatherQ is a mobile application developed and operated by <strong style="color:#fff">
+    DDP Development</strong> ("we", "our", or "the company"). It shows daily weather
+    information combined with an inspirational quote. This Privacy Policy explains what
+    data we collect, how we use it, and your rights regarding that data.
+  </p>
+
+  <!-- 1 -->
+  <h2>1. Data We Collect</h2>
+
+  <div class="card">
+    <div class="card-title">📍 Location <span class="tag">Used locally only</span></div>
+    <p style="margin:0;font-size:14px;color:#A0AEC0;">
+      When you grant location permission, the app uses your device's GPS coordinates
+      solely to fetch weather data from the Open-Meteo API. <strong style="color:#fff">
+      We never store, log, or transmit your location to our own servers.</strong>
+      Coordinates are sent directly from your device to Open-Meteo.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ App Preferences <span class="tag green">On-device only</span></div>
+    <p style="margin:0;font-size:14px;color:#A0AEC0;">
+      Settings you choose (temperature unit, quote language, notification time) are stored
+      only on your device using AsyncStorage. They are never uploaded to any server.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📸 Photo Library <span class="tag green">On-device only</span></div>
+    <p style="margin:0;font-size:14px;color:#A0AEC0;">
+      If you choose to save a weather card, the app writes the image to your device's
+      photo library. We do not read, copy, or upload any existing photos.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📣 Push Notifications <span class="tag green">On-device only</span></div>
+    <p style="margin:0;font-size:14px;color:#A0AEC0;">
+      Daily notifications are scheduled locally on your device. No notification content
+      is sent to or processed by our servers.
+    </p>
+  </div>
+
+  <!-- 2 -->
+  <h2>2. Third-Party Services</h2>
+  <p>WeatherQ uses the following third-party services. Each has its own privacy policy:</p>
+
+  <ul>
+    <li>
+      <strong>Open-Meteo</strong> — weather data API. Receives your GPS coordinates to
+      return weather. No account required. No personal data stored.
+      <a href="https://open-meteo.com/en/terms" target="_blank">open-meteo.com/en/terms</a>
+    </li>
+    <li>
+      <strong>ZenQuotes API</strong> — inspirational quotes (English). No personal data
+      sent. <a href="https://zenquotes.io/terms-of-service" target="_blank">zenquotes.io</a>
+    </li>
+    <li>
+      <strong>Google AdMob</strong> — serves ads to support the free app. AdMob may collect
+      your advertising ID (IDFA on iOS, GAID on Android) and usage data to serve relevant
+      ads. On iOS you will be asked for permission before any tracking occurs (App Tracking
+      Transparency). You can opt out at any time in your device settings.
+      <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a>
+    </li>
+    <li>
+      <strong>Expo / EAS</strong> — build and update infrastructure. No personal user data
+      is collected by Expo at runtime.
+      <a href="https://expo.dev/privacy" target="_blank">expo.dev/privacy</a>
+    </li>
+  </ul>
+
+  <!-- 3 -->
+  <h2>3. Advertising & Tracking (iOS — ATT)</h2>
+  <p>
+    On iOS 14 and later, we request App Tracking Transparency (ATT) permission before
+    allowing AdMob to track activity across apps. If you decline, AdMob will serve
+    non-personalised ads and no cross-app tracking will occur.
+  </p>
+  <p>
+    You can change your tracking preference at any time:
+    <strong style="color:#fff">iPhone Settings → Privacy & Security → Tracking → WeatherQ</strong>
+  </p>
+
+  <!-- 4 -->
+  <h2>4. Data Retention</h2>
+  <p>
+    WeatherQ does not operate any servers or databases. All app data (preferences, cached
+    weather, cached quotes) lives only on your device and is deleted when you uninstall
+    the app.
+  </p>
+
+  <!-- 5 -->
+  <h2>5. Children's Privacy</h2>
+  <p>
+    WeatherQ is rated for users aged 13 and above. We do not knowingly collect any personal
+    information from children under 13. If you believe a child has provided personal
+    information through this app, please contact us.
+  </p>
+
+  <!-- 6 -->
+  <h2>6. Your Rights</h2>
+  <p>Since we do not collect or store personal data on our servers, there is nothing to
+  request, export, or delete. You can remove all locally stored app data by uninstalling
+  WeatherQ from your device.</p>
+  <p>For EU/EEA users (GDPR): your rights under GDPR apply to data processed by our
+  third-party partners (Google AdMob). Please refer to Google's Privacy Policy for
+  instructions on exercising those rights.</p>
+
+  <!-- 7 -->
+  <h2>7. Changes to This Policy</h2>
+  <p>
+    We may update this Privacy Policy from time to time. Any changes will be reflected
+    on this page with an updated "Last updated" date. Continued use of the app after
+    changes constitutes acceptance of the updated policy.
+  </p>
+
+  <!-- 8 -->
+  <h2>8. Contact</h2>
+  <p>
+    If you have any questions about this Privacy Policy, please contact us at:<br/>
+    <a href="mailto:sam.helmi90@gmail.com">sam.helmi90@gmail.com</a>
+  </p>
+
+</div>
+
+<footer>
+  <p>⛅ WeatherQ &nbsp;·&nbsp; © 2026 DDP Development &nbsp;·&nbsp; <a href="mailto:sam.helmi90@gmail.com">sam.helmi90@gmail.com</a></p>
+</footer>
+
+</body>
+</html>

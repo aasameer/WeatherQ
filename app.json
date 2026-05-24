@@ -2,7 +2,7 @@
   "expo": {
     "name": "WeatherQ",
     "slug": "weatherq",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -14,10 +14,20 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.weatherq.app",
+      "buildNumber": "1",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "WeatherQ uses your location to show accurate weather for your area.",
-        "NSPhotoLibraryAddUsageDescription": "WeatherQ saves weather quote cards to your photo library.",
-        "NSPhotoLibraryUsageDescription": "WeatherQ accesses your photo library to save weather quote cards."
+        "NSLocationWhenInUseUsageDescription": "WeatherQ uses your location to show accurate local weather.",
+        "NSPhotoLibraryAddUsageDescription": "WeatherQ saves your weather quote cards to your photo library.",
+        "NSPhotoLibraryUsageDescription": "WeatherQ accesses your photo library to save weather quote cards.",
+        "NSUserTrackingUsageDescription": "This allows WeatherQ to show more relevant ads and helps keep the app free.",
+        "UIBackgroundModes": ["fetch", "remote-notification"],
+        "BGTaskSchedulerPermittedIdentifiers": ["WEATHERQ_DAILY_REFRESH"],
+        "SKAdNetworkItems": [
+          { "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork" },
+          { "SKAdNetworkIdentifier": "4fzdc2evr5.skadnetwork" },
+          { "SKAdNetworkIdentifier": "2fnua5tdw4.skadnetwork" },
+          { "SKAdNetworkIdentifier": "ydx93a7ass.skadnetwork" }
+        ]
       }
     },
     "android": {

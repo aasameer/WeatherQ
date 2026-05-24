@@ -142,19 +142,19 @@ const preloadInterstitial = () => {
  * was actually shown (so the caller can choose to delay any post-action
  * UI feedback). Otherwise resolves quickly without blocking.
  */
-export const maybeShowShareInterstitial = async () => {
+export const maybeShowShareInterstitial = async (bypassRateLimit = false) => {
   if (!adsAvailable() || !initialized) return false;
 
-  // Cold-start grace period
-  if (Date.now() - appStartTime < POLICY.coldStartGraceMs) return false;
+  // Cold-start grace period (skip in dev when bypassing)
+  if (!bypassRateLimit && Date.now() - appStartTime < POLICY.coldStartGraceMs) return false;
 
   const state = (await loadFromCache(CACHE_KEY)) ?? { shareCount: 0, lastShownAt: 0 };
 
   const nextCount = state.shareCount + 1;
   const sinceLast = Date.now() - state.lastShownAt;
 
-  const counterHit  = nextCount % POLICY.shareCountInterval === 0;
-  const timeAllowed = sinceLast >= POLICY.minMillisBetween;
+  const counterHit  = bypassRateLimit || nextCount % POLICY.shareCountInterval === 0;
+  const timeAllowed = bypassRateLimit || sinceLast >= POLICY.minMillisBetween;
 
   await saveToCache(CACHE_KEY, { ...state, shareCount: nextCount });
 
