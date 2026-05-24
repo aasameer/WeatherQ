@@ -2,7 +2,7 @@
   "expo": {
     "name": "WeatherQ",
     "slug": "weatherq",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -20,6 +20,8 @@
         "NSPhotoLibraryAddUsageDescription": "WeatherQ saves your weather quote cards to your photo library.",
         "NSPhotoLibraryUsageDescription": "WeatherQ accesses your photo library to save weather quote cards.",
         "NSUserTrackingUsageDescription": "This allows WeatherQ to show more relevant ads and helps keep the app free.",
+        "UIBackgroundModes": ["fetch", "remote-notification"],
+        "BGTaskSchedulerPermittedIdentifiers": ["WEATHERQ_DAILY_REFRESH"],
         "SKAdNetworkItems": [
           { "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork" },
           { "SKAdNetworkIdentifier": "4fzdc2evr5.skadnetwork" },

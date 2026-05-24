@@ -50,8 +50,9 @@ const AboutScreen = ({ navigation }) => (
         >
           <Text style={styles.heroIcon}>⛅</Text>
           <Text style={styles.heroName}>WeatherQ</Text>
-          <Text style={styles.heroVersion}>Version 1.0.0</Text>
+          <Text style={styles.heroVersion}>Version 1.2.0</Text>
           <Text style={styles.heroTagline}>Weather that speaks to you</Text>
+          <Text style={styles.heroByline}>by DDP Development</Text>
         </LinearGradient>
 
         {/* Description */}
@@ -113,6 +114,7 @@ const AboutScreen = ({ navigation }) => (
         </View>
 
         <Text style={styles.footer}>
+          © 2026 DDP Development. All rights reserved.{'\n'}
           Made with ❤️ using React Native + Expo{'\n'}
           Weather data © Open-Meteo contributors{'\n'}
           Quotes © ZenQuotes.io
@@ -151,6 +153,7 @@ const styles = StyleSheet.create({
   heroName:    { fontSize: 28, fontWeight: '800', color: '#FFF', letterSpacing: 2 },
   heroVersion: { fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 4 },
   heroTagline: { fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 8, fontStyle: 'italic' },
+  heroByline:  { fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 14, letterSpacing: 1.2, fontWeight: '600' },
   sectionHeader: {
     fontSize:      12,
     fontWeight:    '600',
