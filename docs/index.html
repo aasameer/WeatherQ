@@ -13,32 +13,57 @@
       align-items: center; justify-content: center;
       text-align: center; padding: 24px;
     }
-    .logo  { font-size: 72px; margin-bottom: 20px; }
-    h1     { font-size: 42px; font-weight: 800; color: #fff; margin-bottom: 12px; }
-    p      { font-size: 18px; color: rgba(255,255,255,0.65); max-width: 480px; line-height: 1.7; margin-bottom: 40px; }
-    .links { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .logo       { font-size: 72px; margin-bottom: 20px; }
+    h1          { font-size: 42px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .tagline    { font-size: 18px; color: rgba(255,255,255,0.65); max-width: 480px; line-height: 1.7; margin-bottom: 12px; }
+    .by         {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-bottom: 40px; font-size: 13px; color: rgba(255,255,255,0.55);
+      padding: 6px 14px; border-radius: 30px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    }
+    .by img     { height: 18px; filter: brightness(1.5); opacity: 0.85; }
+    .by a       { color: rgba(255,255,255,0.85); text-decoration: none; font-weight: 600; padding: 0; }
+    .links      { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
     a {
       padding: 14px 28px; border-radius: 50px; font-size: 15px; font-weight: 600;
       text-decoration: none; transition: opacity .2s;
     }
-    a:hover { opacity: 0.8; }
+    a:hover     { opacity: 0.8; }
     .btn-primary { background: #63B3ED; color: #0D1B3E; }
     .btn-outline { border: 1px solid rgba(255,255,255,0.25); color: #fff; }
-    footer { position: absolute; bottom: 24px; font-size: 13px; color: rgba(255,255,255,0.3); }
+    footer {
+      position: absolute; bottom: 24px; font-size: 13px;
+      color: rgba(255,255,255,0.3); text-align: center;
+    }
+    footer a { color: rgba(255,255,255,0.5); padding: 0; }
   </style>
 </head>
 <body>
+
   <div class="logo">⛅</div>
   <h1>WeatherQ</h1>
-  <p>Daily weather + inspirational quotes in one beautiful, shareable card.<br/>
-     <span style="font-size:14px;opacity:0.5">by DDP Development</span></p>
+  <p class="tagline">Daily weather + inspirational quotes in one beautiful, shareable card.</p>
+
+  <span class="by">
+    Built by <img src="ddp-logo.png" alt="" />
+    <a href="https://devpioneers.sa" target="_blank">Digital Development Pioneers</a>
+  </span>
+
   <div class="links">
     <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.weatherq.app" target="_blank">
-
       Get on Google Play
     </a>
-    <a class="btn-outline" href="https://aasameer.github.io/WeatherQ/privacy-policy.html">Privacy Policy</a>
+    <a class="btn-outline" href="https://aasameer.github.io/WeatherQ/privacy-policy.html">
+      Privacy Policy
+    </a>
   </div>
-  <footer>© 2026 DDP Development · <a href="mailto:sam.helmi90@gmail.com" style="color:rgba(255,255,255,0.4)">sam.helmi90@gmail.com</a></footer>
+
+  <footer>
+    © 2026 <a href="https://devpioneers.sa" target="_blank">Digital Development Pioneers</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:sam.helmi90@gmail.com">sam.helmi90@gmail.com</a>
+  </footer>
+
 </body>
 </html>

@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Linking, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Linking, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { UI, TEXT, GLASS } from '../constants/colors';
+
+const DDP_LOGO = require('../../assets/ddp-logo.png');
 
 const ExternalLink = ({ icon, title, subtitle, url }) => (
   <TouchableOpacity
@@ -52,8 +54,23 @@ const AboutScreen = ({ navigation }) => (
           <Text style={styles.heroName}>WeatherQ</Text>
           <Text style={styles.heroVersion}>Version 1.2.0</Text>
           <Text style={styles.heroTagline}>Weather that speaks to you</Text>
-          <Text style={styles.heroByline}>by DDP Development</Text>
         </LinearGradient>
+
+        {/* Developer card */}
+        <Text style={styles.sectionHeader}>DEVELOPED BY</Text>
+        <TouchableOpacity
+          style={styles.devCard}
+          activeOpacity={0.85}
+          onPress={() => Linking.openURL('https://devpioneers.sa')}
+        >
+          <Image source={DDP_LOGO} style={styles.devLogo} resizeMode="contain" />
+          <View style={styles.devText}>
+            <Text style={styles.devName}>Digital Development Pioneers</Text>
+            <Text style={styles.devTagline}>Where creativity meets technology</Text>
+            <Text style={styles.devLink}>devpioneers.sa</Text>
+          </View>
+          <Ionicons name="open-outline" size={16} color={TEXT.muted} />
+        </TouchableOpacity>
 
         {/* Description */}
         <Text style={styles.sectionHeader}>ABOUT</Text>
@@ -95,11 +112,7 @@ const AboutScreen = ({ navigation }) => (
             icon="document-text-outline"
             title="Privacy Policy"
             subtitle="How we handle your data"
-          />
-          <ExternalLink
-            icon="shield-checkmark-outline"
-            title="Terms of Service"
-            subtitle="Usage guidelines"
+            url="https://aasameer.github.io/WeatherQ/privacy-policy.html"
           />
         </View>
 
@@ -109,13 +122,20 @@ const AboutScreen = ({ navigation }) => (
           <ExternalLink
             icon="mail-outline"
             title="Send Feedback"
-            subtitle="We'd love to hear from you"
+            subtitle="sam.helmi90@gmail.com"
+            url="mailto:sam.helmi90@gmail.com?subject=WeatherQ%20Feedback"
+          />
+          <ExternalLink
+            icon="globe-outline"
+            title="Visit DDP"
+            subtitle="devpioneers.sa"
+            url="https://devpioneers.sa"
           />
         </View>
 
         <Text style={styles.footer}>
-          © 2026 DDP Development. All rights reserved.{'\n'}
-          Made with ❤️ using React Native + Expo{'\n'}
+          © 2026 Digital Development Pioneers. All rights reserved.{'\n'}
+          Made with ❤️ in Riyadh using React Native + Expo{'\n'}
           Weather data © Open-Meteo contributors{'\n'}
           Quotes © ZenQuotes.io
         </Text>
@@ -153,7 +173,19 @@ const styles = StyleSheet.create({
   heroName:    { fontSize: 28, fontWeight: '800', color: '#FFF', letterSpacing: 2 },
   heroVersion: { fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 4 },
   heroTagline: { fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 8, fontStyle: 'italic' },
-  heroByline:  { fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 14, letterSpacing: 1.2, fontWeight: '600' },
+  devCard: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    backgroundColor:   UI.settingsCard,
+    borderRadius:      16,
+    padding:           14,
+    gap:               14,
+  },
+  devLogo:    { width: 48, height: 48, tintColor: '#FFF' },
+  devText:    { flex: 1 },
+  devName:    { fontSize: 15, fontWeight: '700', color: TEXT.primary },
+  devTagline: { fontSize: 12, color: TEXT.muted, marginTop: 2, fontStyle: 'italic' },
+  devLink:    { fontSize: 11, color: '#63B3ED', marginTop: 4, letterSpacing: 0.5 },
   sectionHeader: {
     fontSize:      12,
     fontWeight:    '600',
