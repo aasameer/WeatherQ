@@ -34,6 +34,21 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.2.1] — 2026-05-24
+
+### Changed
+- Full proper branding: **Digital Development Pioneers** (was "DDP Development")
+- Real DDP logo (downloaded from devpioneers.sa) shown on About screen + landing page
+- About screen: dedicated "Developed By" card with DDP logo, tagline, devpioneers.sa link
+- Privacy policy: company name, link to devpioneers.sa, logo in header
+- Landing page: "Built by [DDP logo] Digital Development Pioneers" chip
+- About screen wired up real links (Privacy Policy → GitHub Pages, Send Feedback → email)
+
+### Added
+- assets/ddp-logo.png + docs/ddp-logo.png
+
+---
+
 ## [1.2.0] — 2026-05-21
 
 ### Added
@@ -41,12 +56,8 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
   every ~12 h to fetch fresh weather + quote and reschedule notifications.
   Notifications no longer show stale "yesterday's weather".
 - iOS `UIBackgroundModes` + `BGTaskSchedulerPermittedIdentifiers` registered.
-- "Powered by DDP Development" branding on About screen, privacy policy
-  and landing page.
-
-### Changed
-- Copyright: © 2026 DDP Development (was generic "WeatherQ").
-- About screen version bumped to 1.2.0 with DDP byline.
+- Initial "DDP Development" branding on About screen, privacy policy
+  and landing page (replaced by full name in v1.2.1).
 
 ---
 
