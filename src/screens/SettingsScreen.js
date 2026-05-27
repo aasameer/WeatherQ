@@ -9,6 +9,7 @@ import {
   StatusBar,
   Switch,
   Platform,
+  Linking,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -73,6 +74,34 @@ const WEEKDAYS = [
   { id: 7, label: 'Sat' },
   { id: 1, label: 'Sun' },
 ];
+
+/* ─── Store rating deep-link ──────────────────────────────────────────── */
+// Android package name matches app.json android.package
+// iOS App ID will be filled in once the app is approved on the App Store
+const PLAY_STORE_PACKAGE = 'com.weatherq.app';
+const APP_STORE_ID       = null; // e.g. '1234567890' once approved
+
+const openStoreRating = async () => {
+  try {
+    if (Platform.OS === 'android') {
+      // market://… first (opens Play Store app directly); fall back to web
+      const marketUrl = `market://details?id=${PLAY_STORE_PACKAGE}`;
+      const webUrl    = `https://play.google.com/store/apps/details?id=${PLAY_STORE_PACKAGE}`;
+      const canOpen = await Linking.canOpenURL(marketUrl);
+      await Linking.openURL(canOpen ? marketUrl : webUrl);
+    } else if (Platform.OS === 'ios' && APP_STORE_ID) {
+      // Opens App Store directly on the Reviews tab
+      await Linking.openURL(`itms-apps://apps.apple.com/app/id${APP_STORE_ID}?action=write-review`);
+    } else {
+      Alert.alert(
+        'Coming soon!',
+        'WeatherQ for iOS is still under review. Try again in a few days.'
+      );
+    }
+  } catch (e) {
+    Alert.alert('Could not open store', e?.message ?? 'Please try again later.');
+  }
+};
 
 const summariseDays = (days = []) => {
   if (!days.length) return 'No days selected';
@@ -564,8 +593,8 @@ const SettingsScreen = ({ navigation }) => {
               label="Quiet Hours"
               subtitle={
                 settings.quietHoursEnabled
-                  ? `${formatHourLabel(settings.quietHoursStart)} → ${formatHourLabel(settings.quietHoursEnd)} · only your alarm + safety alerts`
-                  : 'Notifications allowed any time'
+                  ? `${formatHourLabel(settings.quietHoursStart)} → ${formatHourLabel(settings.quietHoursEnd)}`
+                  : 'Always allowed'
               }
               isLast
               right={
@@ -580,8 +609,11 @@ const SettingsScreen = ({ navigation }) => {
             />
             <View style={styles.consolidationHint}>
               <Text style={styles.consolidationHintText}>
+                {settings.quietHoursEnabled
+                  ? '🛡  Your wake-up alarm and critical safety alerts (severe storms, heatstroke, black ice) always come through.\n\n'
+                  : ''}
                 {settings.smartConsolidation
-                  ? '✓ Daily reminder is auto-skipped when Smart Tips is on (they\'re redundant).\n✓ Smart Tips briefing is skipped when your wake-up alarm fires nearby.'
+                  ? '✓ Daily reminder is auto-skipped when Smart Tips is on.\n✓ Smart Tips briefing is skipped when your wake-up alarm fires nearby.'
                   : '⚠️ Consolidation off — you may receive overlapping notifications.'}
               </Text>
             </View>
@@ -653,12 +685,10 @@ const SettingsScreen = ({ navigation }) => {
             />
             <SettingsRow
               icon="star-outline"
-              label="Rate the App"
-              subtitle="Share your feedback"
+              label="Rate WeatherQ"
+              subtitle="Loved it? A 5-star review helps a lot 💛"
               isLast
-              onPress={() =>
-                Alert.alert('Rate WeatherQ', 'Thank you! Rating will be available after publishing.')
-              }
+              onPress={openStoreRating}
             />
           </View>
 
