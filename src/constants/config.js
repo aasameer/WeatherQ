@@ -26,6 +26,12 @@ export const DEFAULT_SETTINGS = {
   smartTipsMode:         'smart',        // 'smart' = engine picks times · 'fixed' = single daily hour
   smartTipsHour:         7,              // used only in 'fixed' mode
   smartTipCategories:    ['clothing', 'activities', 'driving', 'health', 'home', 'mood', 'pets', 'sleep'],
+
+  /* ── Notification Consolidation (anti-spam) ── */
+  smartConsolidation:    true,           // merge/suppress overlapping notifications
+  quietHoursEnabled:     true,           // suppress non-urgent notifications at night
+  quietHoursStart:       22,             // 10 PM
+  quietHoursEnd:         6,              // 6 AM
 };
 
 export const WEATHER_PARAMS = {

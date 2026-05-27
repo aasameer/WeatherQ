@@ -542,6 +542,51 @@ const SettingsScreen = ({ navigation }) => {
             )}
           </View>
 
+          {/* ── Don't Bother Me (anti-spam coordination) ── */}
+          <SectionHeader title="Don't Bother Me" />
+          <View style={styles.card}>
+            <SettingsRow
+              icon="layers-outline"
+              label="Smart Consolidation"
+              subtitle="Auto-merge overlapping notifications"
+              right={
+                <Switch
+                  value={settings.smartConsolidation}
+                  onValueChange={(v) => updateSettings({ smartConsolidation: v })}
+                  trackColor={{ false: 'rgba(255,255,255,0.15)', true: 'rgba(99,179,237,0.6)' }}
+                  thumbColor={settings.smartConsolidation ? '#FFF' : '#CFD8DC'}
+                  ios_backgroundColor="rgba(255,255,255,0.15)"
+                />
+              }
+            />
+            <SettingsRow
+              icon="moon-outline"
+              label="Quiet Hours"
+              subtitle={
+                settings.quietHoursEnabled
+                  ? `${formatHourLabel(settings.quietHoursStart)} → ${formatHourLabel(settings.quietHoursEnd)} · only your alarm + safety alerts`
+                  : 'Notifications allowed any time'
+              }
+              isLast
+              right={
+                <Switch
+                  value={settings.quietHoursEnabled}
+                  onValueChange={(v) => updateSettings({ quietHoursEnabled: v })}
+                  trackColor={{ false: 'rgba(255,255,255,0.15)', true: 'rgba(99,179,237,0.6)' }}
+                  thumbColor={settings.quietHoursEnabled ? '#FFF' : '#CFD8DC'}
+                  ios_backgroundColor="rgba(255,255,255,0.15)"
+                />
+              }
+            />
+            <View style={styles.consolidationHint}>
+              <Text style={styles.consolidationHintText}>
+                {settings.smartConsolidation
+                  ? '✓ Daily reminder is auto-skipped when Smart Tips is on (they\'re redundant).\n✓ Smart Tips briefing is skipped when your wake-up alarm fires nearby.'
+                  : '⚠️ Consolidation off — you may receive overlapping notifications.'}
+              </Text>
+            </View>
+          </View>
+
           {/* ── Dev / Ad Testing (only visible in __DEV__) ── */}
           {__DEV__ && (
             <>
@@ -904,6 +949,18 @@ const styles = StyleSheet.create({
   tipPreviewIcon:  { fontSize: 22, marginRight: 10, marginTop: -2 },
   tipPreviewTitle: { fontSize: 14, fontWeight: '700', color: TEXT.primary },
   tipPreviewBody:  { fontSize: 12, color: TEXT.muted, marginTop: 2, lineHeight: 16 },
+
+  /* Don't Bother Me hint */
+  consolidationHint: {
+    paddingHorizontal: 16,
+    paddingBottom:     14,
+    paddingTop:        4,
+  },
+  consolidationHintText: {
+    fontSize:   11,
+    color:      TEXT.muted,
+    lineHeight: 16,
+  },
   version: {
     fontSize:  12,
     color:     TEXT.muted,
