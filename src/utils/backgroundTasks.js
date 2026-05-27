@@ -83,6 +83,7 @@ TaskManager.defineTask(DAILY_REFRESH_TASK, async () => {
       alarmMinute:        settings.alarmMinute,
       alarmDays:          settings.alarmDays,
       smartTipsEnabled:   settings.smartTipsEnabled,
+      smartTipsMode:      settings.smartTipsMode,
       smartTipsHour:      settings.smartTipsHour,
       smartTipCategories: settings.smartTipCategories,
     });

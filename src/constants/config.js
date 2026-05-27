@@ -22,8 +22,9 @@ export const DEFAULT_SETTINGS = {
   alarmMinute:           30,
   alarmDays:             [2, 3, 4, 5, 6], // ISO: 1=Sun, 2=Mon, ..., 7=Sat
   /* ── Smart Tips Notification ── */
-  smartTipsEnabled:      false,
-  smartTipsHour:         7,
+  smartTipsEnabled:      true,           // ON by default
+  smartTipsMode:         'smart',        // 'smart' = engine picks times · 'fixed' = single daily hour
+  smartTipsHour:         7,              // used only in 'fixed' mode
   smartTipCategories:    ['clothing', 'activities', 'driving', 'health', 'home', 'mood', 'pets', 'sleep'],
 };
 

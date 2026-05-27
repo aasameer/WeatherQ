@@ -34,6 +34,27 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.6.1] — 2026-05-24
+
+### Changed
+- **Smart Tips now enabled by default** (was opt-in)
+- **New "Smart" delivery mode** (default) — engine picks times:
+  - Morning briefing at **7 AM** (always, with top 3 tips)
+  - Urgent alerts at **11 AM · 2 PM · 5 PM · 8 PM** — only if there's
+    a tip with priority ≥ 80 (storms, heatwave, black ice, fog,
+    severe wind, freezing pipes, hot-car-pets…)
+- Old behaviour preserved as **"Fixed time"** mode — pick a single
+  delivery hour just like before
+- Settings UI: new Smart vs Fixed mode selector with explainer card
+
+### Notes
+- Smart mode notifications still require user to grant notification
+  permission. Existing toggle handler in Settings requests it.
+- All scheduled notifications continue to be background-refreshed
+  every ~12h so content reflects current weather.
+
+---
+
 ## [1.6.0] — 2026-05-24
 
 ### Added

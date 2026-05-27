@@ -113,34 +113,89 @@ const scheduleDailyReminders = async ({ titleBase, body, hour, days = 7 }) => {
   }
 };
 
-/* ── Schedule daily smart tips notification ──────────────────────────── */
-const scheduleSmartTips = async ({ weather, city, categories, hour, days = 7 }) => {
+/* ── Smart Tips: helpers ─────────────────────────────────────────────── */
+// Time slots used in smart mode (24h)
+const SMART_SLOTS = [
+  { hour:  7, label: 'Morning briefing',  type: 'briefing' },
+  { hour: 11, label: 'Late morning',      type: 'urgent-only' },
+  { hour: 14, label: 'Afternoon',         type: 'urgent-only' },
+  { hour: 17, label: 'Evening commute',   type: 'urgent-only' },
+  { hour: 20, label: 'Evening',           type: 'urgent-only' },
+];
+
+// Tips are "urgent" if their priority crosses this threshold (storms,
+// heatwave, black ice, fog, severe wind, freezing pipes, no-car-pets…)
+const URGENT_PRIORITY = 80;
+
+const scheduleSmartTipOne = async ({ fireAt, title, body }) => {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title,
+      body,
+      sound: 'default',
+      data:  { type: 'smart-tips' },
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: fireAt,
+      channelId: Platform.OS === 'android' ? 'smart-tips' : undefined,
+    },
+  });
+};
+
+/* ── FIXED mode — one notification per day at chosen hour ────────────── */
+const scheduleSmartTipsFixed = async ({ weather, city, categories, hour, days = 7 }) => {
   const tips = getActiveTips(weather, categories, 3);
   if (!tips.length) return;
 
   const body  = formatTipsForNotification(tips);
-  const title = city ? `💡 Today's Tips for ${city}` : '💡 Today\'s Smart Tips';
+  const title = city ? `💡 Today's Tips for ${city}` : "💡 Today's Smart Tips";
 
   const now = new Date();
   for (let i = 1; i <= days; i += 1) {
     const fireAt = new Date(now);
     fireAt.setDate(now.getDate() + i);
     fireAt.setHours(hour, 0, 0, 0);
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title,
-        body,
-        sound: 'default',
-        data:  { type: 'smart-tips' },
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: fireAt,
-        channelId: Platform.OS === 'android' ? 'smart-tips' : undefined,
-      },
-    });
+    await scheduleSmartTipOne({ fireAt, title, body });
   }
+};
+
+/* ── SMART mode — multiple time slots, only urgent fires outside briefing ─ */
+const scheduleSmartTipsSmart = async ({ weather, city, categories, days = 7 }) => {
+  const allTips = getActiveTips(weather, categories, 5);
+  if (!allTips.length) return;
+
+  const briefing = allTips.slice(0, 3);
+  const urgent   = allTips.find((t) => t.priority >= URGENT_PRIORITY);
+
+  const briefingTitle = city ? `💡 Today's Tips for ${city}` : "💡 Today's Smart Tips";
+  const briefingBody  = formatTipsForNotification(briefing);
+
+  const urgentTitle   = urgent ? `${urgent.icon}  ${urgent.title}` : null;
+  const urgentBody    = urgent ? urgent.body : null;
+
+  const now = new Date();
+  for (let i = 1; i <= days; i += 1) {
+    for (const slot of SMART_SLOTS) {
+      const fireAt = new Date(now);
+      fireAt.setDate(now.getDate() + i);
+      fireAt.setHours(slot.hour, 0, 0, 0);
+
+      if (slot.type === 'briefing') {
+        await scheduleSmartTipOne({ fireAt, title: briefingTitle, body: briefingBody });
+      } else if (slot.type === 'urgent-only' && urgent) {
+        await scheduleSmartTipOne({ fireAt, title: urgentTitle, body: urgentBody });
+      }
+    }
+  }
+};
+
+/* ── Smart Tips dispatcher ───────────────────────────────────────────── */
+const scheduleSmartTips = async ({ weather, city, categories, mode = 'smart', hour, days }) => {
+  if (mode === 'fixed') {
+    return scheduleSmartTipsFixed({ weather, city, categories, hour, days });
+  }
+  return scheduleSmartTipsSmart({ weather, city, categories, days });
 };
 
 /* ── Schedule weekly wake-up alarms ───────────────────────────────────── */
@@ -187,6 +242,7 @@ export const rescheduleAllNotifications = async ({
   alarmMinute  = 30,
   alarmDays    = [],
   smartTipsEnabled    = false,
+  smartTipsMode       = 'smart',
   smartTipsHour       = 7,
   smartTipCategories  = [],
 }) => {
@@ -218,6 +274,7 @@ export const rescheduleAllNotifications = async ({
       weather,
       city:       cityInfo?.city,
       categories: smartTipCategories,
+      mode:       smartTipsMode,
       hour:       smartTipsHour,
     });
   }
