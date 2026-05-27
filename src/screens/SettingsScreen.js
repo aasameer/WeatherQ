@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useSettings }  from '../context/SettingsContext';
-import { clearAllCache } from '../utils/cache';
+import { clearAllCache, loadFromCache } from '../utils/cache';
 import { UI, TEXT, GLASS } from '../constants/colors';
+import { CACHE_KEYS } from '../constants/config';
 import { SUPPORTED_LANGUAGES, getLanguageMeta } from '../constants/quotes';
 import { requestNotificationPermission, cancelAllNotifications } from '../utils/notifications';
+import { getActiveTips, TIP_CATEGORIES } from '../utils/smartRecommendations';
 import { adsAvailable, getAdsDebugInfo, maybeShowShareInterstitial } from '../ads/AdService';
 
 const SectionHeader = ({ title }) => (
@@ -87,8 +89,44 @@ const summariseDays = (days = []) => {
 const SettingsScreen = ({ navigation }) => {
   const { settings, updateSettings } = useSettings();
   const [timePickerOpen, setTimePickerOpen] = useState(false);
+  const [cachedWeather, setCachedWeather]   = useState(null);
+
+  /* Load cached weather to power the live tip preview */
+  useEffect(() => {
+    loadFromCache(CACHE_KEYS.LAST_WEATHER).then((c) => {
+      if (c?.weather) setCachedWeather({ weather: c.weather, city: c.city });
+    });
+  }, []);
 
   const isCelsius = settings.temperatureUnit === 'C';
+
+  const handleToggleSmartTips = async (next) => {
+    if (next) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        Alert.alert(
+          'Permission needed',
+          'Enable notifications in your device settings to receive smart weather tips.'
+        );
+        return;
+      }
+      await updateSettings({ smartTipsEnabled: true });
+    } else {
+      await updateSettings({ smartTipsEnabled: false });
+    }
+  };
+
+  const toggleTipCategory = (catId) => {
+    const current = settings.smartTipCategories ?? [];
+    const next = current.includes(catId)
+      ? current.filter((c) => c !== catId)
+      : [...current, catId];
+    updateSettings({ smartTipCategories: next });
+  };
+
+  const activeTips = cachedWeather?.weather
+    ? getActiveTips(cachedWeather.weather, settings.smartTipCategories, 5)
+    : [];
 
   const handleToggleAlarm = async (next) => {
     if (next) {
@@ -361,6 +399,101 @@ const SettingsScreen = ({ navigation }) => {
               onChange={onTimeChange}
             />
           )}
+
+          {/* ── Smart Tips ── */}
+          <SectionHeader title="Smart Tips" />
+          <View style={styles.card}>
+            <SettingsRow
+              icon="bulb-outline"
+              label="Daily Smart Tips"
+              subtitle={
+                settings.smartTipsEnabled
+                  ? `Every day at ${formatHourLabel(settings.smartTipsHour)} · ${activeTips.length} active`
+                  : 'Personalized tips based on today\'s weather'
+              }
+              isLast={!settings.smartTipsEnabled}
+              right={
+                <Switch
+                  value={settings.smartTipsEnabled}
+                  onValueChange={handleToggleSmartTips}
+                  trackColor={{ false: 'rgba(255,255,255,0.15)', true: 'rgba(99,179,237,0.6)' }}
+                  thumbColor={settings.smartTipsEnabled ? '#FFF' : '#CFD8DC'}
+                  ios_backgroundColor="rgba(255,255,255,0.15)"
+                />
+              }
+            />
+
+            {settings.smartTipsEnabled && (
+              <View style={styles.alarmConfig}>
+                {/* Hour chips */}
+                <Text style={styles.hourPickerLabel}>Delivery time</Text>
+                <View style={styles.hourGrid}>
+                  {NOTIFICATION_HOURS.map((h) => {
+                    const active = settings.smartTipsHour === h;
+                    return (
+                      <TouchableOpacity
+                        key={h}
+                        style={[styles.hourChip, active && styles.hourChipActive]}
+                        onPress={() => updateSettings({ smartTipsHour: h })}
+                        activeOpacity={0.75}
+                      >
+                        <Text style={[styles.hourChipText, active && styles.hourChipTextActive]}>
+                          {formatHourLabel(h)}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Categories */}
+                <Text style={[styles.hourPickerLabel, { marginTop: 14 }]}>Categories</Text>
+                <View style={styles.tipCatGrid}>
+                  {TIP_CATEGORIES.map((cat) => {
+                    const active = (settings.smartTipCategories ?? []).includes(cat.id);
+                    return (
+                      <TouchableOpacity
+                        key={cat.id}
+                        style={[styles.tipCatChip, active && styles.tipCatChipActive]}
+                        onPress={() => toggleTipCategory(cat.id)}
+                        activeOpacity={0.75}
+                      >
+                        <Text style={styles.tipCatEmoji}>{cat.emoji}</Text>
+                        <Text style={[styles.tipCatText, active && styles.tipCatTextActive]}>
+                          {cat.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Live preview */}
+                <Text style={[styles.hourPickerLabel, { marginTop: 14 }]}>
+                  Preview {cachedWeather?.city?.city ? `· ${cachedWeather.city.city}` : ''}
+                </Text>
+                {activeTips.length === 0 ? (
+                  <View style={styles.tipPreviewEmpty}>
+                    <Text style={styles.tipPreviewEmptyText}>
+                      {!cachedWeather
+                        ? 'Open the home screen first so we can load your weather…'
+                        : 'No tips active for the selected categories right now.'}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.tipPreviewList}>
+                    {activeTips.map((tip) => (
+                      <View key={tip.id} style={styles.tipPreviewRow}>
+                        <Text style={styles.tipPreviewIcon}>{tip.icon}</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.tipPreviewTitle}>{tip.title}</Text>
+                          <Text style={styles.tipPreviewBody}>{tip.body}</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
 
           {/* ── Dev / Ad Testing (only visible in __DEV__) ── */}
           {__DEV__ && (
@@ -658,6 +791,46 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 16,
   },
+
+  /* Smart Tips */
+  tipCatGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8,
+  },
+  tipCatChip: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 12, paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: GLASS.background,
+    borderWidth: 1, borderColor: GLASS.border,
+  },
+  tipCatChipActive: {
+    backgroundColor: 'rgba(99,179,237,0.30)',
+    borderColor:     'rgba(99,179,237,0.65)',
+  },
+  tipCatEmoji:      { fontSize: 14, marginRight: 5 },
+  tipCatText:       { fontSize: 12, fontWeight: '500', color: TEXT.muted },
+  tipCatTextActive: { color: '#FFF', fontWeight: '700' },
+
+  tipPreviewEmpty: {
+    paddingVertical: 14, paddingHorizontal: 12, marginTop: 6,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
+  },
+  tipPreviewEmptyText: {
+    fontSize: 12, color: TEXT.muted, textAlign: 'center', lineHeight: 18,
+  },
+
+  tipPreviewList: { gap: 6, marginTop: 6 },
+  tipPreviewRow: {
+    flexDirection: 'row', alignItems: 'flex-start',
+    padding: 12, borderRadius: 12,
+    backgroundColor: 'rgba(99,179,237,0.10)',
+    borderWidth: 1, borderColor: 'rgba(99,179,237,0.25)',
+  },
+  tipPreviewIcon:  { fontSize: 22, marginRight: 10, marginTop: -2 },
+  tipPreviewTitle: { fontSize: 14, fontWeight: '700', color: TEXT.primary },
+  tipPreviewBody:  { fontSize: 12, color: TEXT.muted, marginTop: 2, lineHeight: 16 },
   version: {
     fontSize:  12,
     color:     TEXT.muted,

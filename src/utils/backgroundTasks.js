@@ -36,7 +36,7 @@ TaskManager.defineTask(DAILY_REFRESH_TASK, async () => {
       ...(await loadFromCache(CACHE_KEYS.SETTINGS)),
     };
 
-    if (!settings.notificationsEnabled && !settings.alarmEnabled) {
+    if (!settings.notificationsEnabled && !settings.alarmEnabled && !settings.smartTipsEnabled) {
       return BackgroundFetch.BackgroundFetchResult.NoData;
     }
 
@@ -70,18 +70,21 @@ TaskManager.defineTask(DAILY_REFRESH_TASK, async () => {
       weather,
     });
 
-    /* 6. Reschedule daily reminders + wake-up alarms with the FRESH content */
+    /* 6. Reschedule all notifications (daily + alarms + smart tips) with FRESH content */
     await rescheduleAllNotifications({
       weather,
-      cityInfo:     cached.city,
+      cityInfo:           cached.city,
       quote,
-      unit:         settings.temperatureUnit,
-      dailyEnabled: settings.notificationsEnabled,
-      dailyHour:    settings.notificationHour,
-      alarmEnabled: settings.alarmEnabled,
-      alarmHour:    settings.alarmHour,
-      alarmMinute:  settings.alarmMinute,
-      alarmDays:    settings.alarmDays,
+      unit:               settings.temperatureUnit,
+      dailyEnabled:       settings.notificationsEnabled,
+      dailyHour:          settings.notificationHour,
+      alarmEnabled:       settings.alarmEnabled,
+      alarmHour:          settings.alarmHour,
+      alarmMinute:        settings.alarmMinute,
+      alarmDays:          settings.alarmDays,
+      smartTipsEnabled:   settings.smartTipsEnabled,
+      smartTipsHour:      settings.smartTipsHour,
+      smartTipCategories: settings.smartTipCategories,
     });
 
     return BackgroundFetch.BackgroundFetchResult.NewData;

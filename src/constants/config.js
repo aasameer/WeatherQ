@@ -21,6 +21,10 @@ export const DEFAULT_SETTINGS = {
   alarmHour:             6,
   alarmMinute:           30,
   alarmDays:             [2, 3, 4, 5, 6], // ISO: 1=Sun, 2=Mon, ..., 7=Sat
+  /* ── Smart Tips Notification ── */
+  smartTipsEnabled:      false,
+  smartTipsHour:         7,
+  smartTipCategories:    ['clothing', 'activities', 'driving', 'health', 'home', 'mood', 'pets', 'sleep'],
 };
 
 export const WEATHER_PARAMS = {
