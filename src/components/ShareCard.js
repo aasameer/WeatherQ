@@ -5,6 +5,7 @@ import { WEATHER_GRADIENTS } from '../constants/colors';
 import { DEFAULT_TEMPLATE } from '../constants/cardTemplates';
 import { getWeatherInfo, formatTemperatureWithUnit } from '../utils/weatherHelpers';
 import { formatFullDate } from '../utils/dateHelpers';
+import WeatherIcon from './WeatherIcon';
 
 const isRtl = (text = '') => /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/.test(text);
 
@@ -40,7 +41,7 @@ export const ShareCardSquare = ({ weather, cityInfo, quote, unit = 'C', template
 
       {/* Centre */}
       <View style={sq.centre}>
-        <Text style={sq.emoji}>{info.emoji}</Text>
+        <WeatherIcon type={info.type} size={60} isDay={current?.is_day === 1} />
         <Text style={[sq.temp, { color: t.textPrimary }]}>{temp}</Text>
         <Text style={[sq.condition, { color: t.textMuted }]}>{info.label}</Text>
 
@@ -105,7 +106,9 @@ export const ShareCardStory = ({ weather, cityInfo, quote, unit = 'C', template 
       <Text style={[st.country, { color: t.textMuted }]}>{country}</Text>
 
       {/* Weather hero */}
-      <Text style={st.emoji}>{info.emoji}</Text>
+      <View style={st.iconBox}>
+        <WeatherIcon type={info.type} size={110} isDay={current?.is_day === 1} />
+      </View>
       <Text style={[st.temp, { color: t.textPrimary }]}>{temp}</Text>
       <Text style={[st.condition, { color: t.textMuted }]}>{info.label}</Text>
 
@@ -155,7 +158,6 @@ const sq = StyleSheet.create({
   country:   { fontSize: 13, marginTop: 2 },
   date:      { fontSize: 11, textAlign: 'right', maxWidth: 120 },
   centre:    { alignItems: 'center' },
-  emoji:     { fontSize: 40, marginBottom: 4 },
   temp:      { fontSize: 56, fontWeight: '800', lineHeight: 64 },
   condition: { fontSize: 16, fontWeight: '500' },
   statsRow:  { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
@@ -177,7 +179,7 @@ const st = StyleSheet.create({
   date:      { fontSize: 12, letterSpacing: 0.5 },
   city:      { fontSize: 32, fontWeight: '800', textAlign: 'center' },
   country:   { fontSize: 16, marginTop: 4 },
-  emoji:     { fontSize: 72, marginVertical: 8 },
+  iconBox:   { marginVertical: 8, alignItems: 'center' },
   temp:      { fontSize: 80, fontWeight: '800', lineHeight: 88 },
   condition: { fontSize: 20, fontWeight: '500' },
   statsRow:  { flexDirection: 'row', gap: 16, marginTop: 4 },
