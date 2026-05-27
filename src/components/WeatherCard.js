@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { GLASS, TEXT } from '../constants/colors';
 import { getWeatherInfo, formatTemperature, formatTemperatureWithUnit } from '../utils/weatherHelpers';
 import { formatTime } from '../utils/dateHelpers';
+import WeatherIcon from './WeatherIcon';
 
 const StatPill = ({ icon, label, value }) => (
   <View style={styles.pill}>
@@ -33,10 +34,12 @@ const WeatherCard = ({ weather, cityInfo, unit = 'C' }) => {
         {cityInfo?.country ? `, ${cityInfo.country}` : ''}
       </Text>
 
-      {/* Big temperature + emoji */}
+      {/* Big temperature + animated icon */}
       <View style={styles.heroRow}>
         <Text style={styles.tempText}>{temp}</Text>
-        <Text style={styles.emoji}>{info.emoji}</Text>
+        <View style={styles.iconBox}>
+          <WeatherIcon type={info.type} size={88} isDay={current.is_day === 1} />
+        </View>
       </View>
 
       <Text style={styles.condition}>{info.label}</Text>
@@ -83,10 +86,9 @@ const styles = StyleSheet.create({
     color:       TEXT.primary,
     lineHeight:  110,
   },
-  emoji: {
-    fontSize:    52,
-    marginLeft:  8,
-    marginTop:   12,
+  iconBox: {
+    marginLeft: 8,
+    marginTop:  16,
   },
   condition: {
     fontSize:    20,
