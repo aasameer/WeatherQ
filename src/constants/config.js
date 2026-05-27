@@ -16,6 +16,11 @@ export const DEFAULT_SETTINGS = {
   quoteLanguage:         'en',
   notificationsEnabled:  false,
   notificationHour:      8,
+  /* ── Wake-up Alarm ── */
+  alarmEnabled:          false,
+  alarmHour:             6,
+  alarmMinute:           30,
+  alarmDays:             [2, 3, 4, 5, 6], // ISO: 1=Sun, 2=Mon, ..., 7=Sat
 };
 
 export const WEATHER_PARAMS = {

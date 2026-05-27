@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,9 @@ import {
   StyleSheet,
   StatusBar,
   Switch,
+  Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -53,10 +55,73 @@ const formatHourLabel = (h) => {
   return `${hour12}:00 ${period}`;
 };
 
+const formatTimeLabel = (h, m) => {
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
+};
+
+// ISO weekday: 1=Sun, 2=Mon ... 7=Sat (matches expo-notifications WEEKLY trigger)
+const WEEKDAYS = [
+  { id: 2, label: 'Mon' },
+  { id: 3, label: 'Tue' },
+  { id: 4, label: 'Wed' },
+  { id: 5, label: 'Thu' },
+  { id: 6, label: 'Fri' },
+  { id: 7, label: 'Sat' },
+  { id: 1, label: 'Sun' },
+];
+
+const summariseDays = (days = []) => {
+  if (!days.length) return 'No days selected';
+  if (days.length === 7) return 'Every day';
+  const weekdays = [2, 3, 4, 5, 6];
+  const weekend  = [1, 7];
+  const isWeekdays = weekdays.every(d => days.includes(d)) && !weekend.some(d => days.includes(d));
+  const isWeekend  = weekend.every(d => days.includes(d)) && !weekdays.some(d => days.includes(d));
+  if (isWeekdays) return 'Weekdays';
+  if (isWeekend)  return 'Weekends';
+  return WEEKDAYS.filter(w => days.includes(w.id)).map(w => w.label).join(' · ');
+};
+
 const SettingsScreen = ({ navigation }) => {
   const { settings, updateSettings } = useSettings();
+  const [timePickerOpen, setTimePickerOpen] = useState(false);
 
   const isCelsius = settings.temperatureUnit === 'C';
+
+  const handleToggleAlarm = async (next) => {
+    if (next) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        Alert.alert(
+          'Permission needed',
+          'Enable notifications in your device settings to receive wake-up alarms.'
+        );
+        return;
+      }
+      await updateSettings({ alarmEnabled: true });
+    } else {
+      await updateSettings({ alarmEnabled: false });
+    }
+  };
+
+  const toggleDay = (dayId) => {
+    const current = settings.alarmDays ?? [];
+    const next = current.includes(dayId)
+      ? current.filter((d) => d !== dayId)
+      : [...current, dayId].sort();
+    updateSettings({ alarmDays: next });
+  };
+
+  const onTimeChange = (event, selectedDate) => {
+    if (Platform.OS === 'android') setTimePickerOpen(false);
+    if (event?.type === 'dismissed' || !selectedDate) return;
+    updateSettings({
+      alarmHour:   selectedDate.getHours(),
+      alarmMinute: selectedDate.getMinutes(),
+    });
+  };
 
   const handleToggleNotifications = async (next) => {
     if (next) {
@@ -222,6 +287,80 @@ const SettingsScreen = ({ navigation }) => {
               </View>
             )}
           </View>
+
+          {/* ── Wake-up Alarm ── */}
+          <SectionHeader title="Wake-up Alarm" />
+          <View style={styles.card}>
+            <SettingsRow
+              icon="alarm-outline"
+              label="Smart Wake-up Alarm"
+              subtitle={
+                settings.alarmEnabled
+                  ? `${formatTimeLabel(settings.alarmHour, settings.alarmMinute)} · ${summariseDays(settings.alarmDays)}`
+                  : 'Wake up with today\'s weather and quote'
+              }
+              isLast={!settings.alarmEnabled}
+              right={
+                <Switch
+                  value={settings.alarmEnabled}
+                  onValueChange={handleToggleAlarm}
+                  trackColor={{ false: 'rgba(255,255,255,0.15)', true: 'rgba(246,200,75,0.6)' }}
+                  thumbColor={settings.alarmEnabled ? '#FFF' : '#CFD8DC'}
+                  ios_backgroundColor="rgba(255,255,255,0.15)"
+                />
+              }
+            />
+
+            {settings.alarmEnabled && (
+              <View style={styles.alarmConfig}>
+                {/* Time picker trigger */}
+                <TouchableOpacity
+                  style={styles.timeBig}
+                  onPress={() => setTimePickerOpen(true)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.timeBigText}>
+                    {formatTimeLabel(settings.alarmHour, settings.alarmMinute)}
+                  </Text>
+                  <Text style={styles.timeBigHint}>Tap to change</Text>
+                </TouchableOpacity>
+
+                {/* Day chips */}
+                <Text style={styles.hourPickerLabel}>Repeat on</Text>
+                <View style={styles.dayGrid}>
+                  {WEEKDAYS.map((day) => {
+                    const active = (settings.alarmDays ?? []).includes(day.id);
+                    return (
+                      <TouchableOpacity
+                        key={day.id}
+                        style={[styles.dayChip, active && styles.dayChipActive]}
+                        onPress={() => toggleDay(day.id)}
+                        activeOpacity={0.75}
+                      >
+                        <Text style={[styles.dayChipText, active && styles.dayChipTextActive]}>
+                          {day.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                <Text style={styles.alarmHint}>
+                  ⏰ Your alarm will play with today's weather and a fresh motivational quote.
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {timePickerOpen && (
+            <DateTimePicker
+              value={new Date(2000, 0, 1, settings.alarmHour, settings.alarmMinute)}
+              mode="time"
+              is24Hour={false}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onTimeChange}
+            />
+          )}
 
           {/* ── Dev / Ad Testing (only visible in __DEV__) ── */}
           {__DEV__ && (
@@ -465,6 +604,60 @@ const styles = StyleSheet.create({
   },
   hourChipText:       { fontSize: 13, fontWeight: '500', color: TEXT.muted },
   hourChipTextActive: { color: '#FFF', fontWeight: '700' },
+
+  /* Wake-up Alarm */
+  alarmConfig: {
+    paddingHorizontal: 16,
+    paddingBottom:     16,
+    borderTopWidth:    1,
+    borderTopColor:    'rgba(255,255,255,0.07)',
+    paddingTop:        14,
+  },
+  timeBig: {
+    alignItems:        'center',
+    paddingVertical:   12,
+    marginBottom:      8,
+  },
+  timeBigText: {
+    fontSize:   52,
+    fontWeight: '800',
+    color:      '#F6C84B',
+    letterSpacing: 1.5,
+  },
+  timeBigHint: {
+    fontSize: 11,
+    color:    TEXT.muted,
+    marginTop: 2,
+    letterSpacing: 0.5,
+  },
+  dayGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    marginBottom: 14,
+  },
+  dayChip: {
+    width:           40,
+    height:          40,
+    borderRadius:    20,
+    backgroundColor: GLASS.background,
+    borderWidth:     1,
+    borderColor:     GLASS.border,
+    alignItems:      'center',
+    justifyContent:  'center',
+  },
+  dayChipActive: {
+    backgroundColor: 'rgba(246,200,75,0.3)',
+    borderColor:     'rgba(246,200,75,0.6)',
+  },
+  dayChipText:       { fontSize: 12, fontWeight: '600', color: TEXT.muted },
+  dayChipTextActive: { color: '#FFF', fontWeight: '800' },
+  alarmHint: {
+    fontSize:  11,
+    color:     TEXT.muted,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
   version: {
     fontSize:  12,
     color:     TEXT.muted,

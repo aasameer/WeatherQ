@@ -25,7 +25,7 @@ import { useSavedCities, CURRENT_LOCATION_ID } from '../hooks/useSavedCities';
 import CitySwitcher     from '../components/CitySwitcher';
 import { useSettings }  from '../context/SettingsContext';
 import { getWeatherInfo } from '../utils/weatherHelpers';
-import { scheduleDailyNotifications, cancelAllNotifications } from '../utils/notifications';
+import { rescheduleAllNotifications, cancelAllNotifications } from '../utils/notifications';
 import { TEXT, GLASS }   from '../constants/colors';
 
 const HomeScreen = ({ navigation }) => {
@@ -89,19 +89,24 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [weather]);
 
-  /* ── Re-schedule daily notifications when data or prefs change ── */
+  /* ── Re-schedule notifications (daily + alarms) when anything changes ── */
   useEffect(() => {
-    if (!settings.notificationsEnabled) {
+    if (!settings.notificationsEnabled && !settings.alarmEnabled) {
       cancelAllNotifications();
       return;
     }
     if (weather && quote) {
-      scheduleDailyNotifications({
+      rescheduleAllNotifications({
         weather,
         cityInfo,
         quote,
-        unit: settings.temperatureUnit,
-        hour: settings.notificationHour,
+        unit:         settings.temperatureUnit,
+        dailyEnabled: settings.notificationsEnabled,
+        dailyHour:    settings.notificationHour,
+        alarmEnabled: settings.alarmEnabled,
+        alarmHour:    settings.alarmHour,
+        alarmMinute:  settings.alarmMinute,
+        alarmDays:    settings.alarmDays,
       });
     }
   }, [
@@ -110,6 +115,10 @@ const HomeScreen = ({ navigation }) => {
     cityInfo,
     settings.notificationsEnabled,
     settings.notificationHour,
+    settings.alarmEnabled,
+    settings.alarmHour,
+    settings.alarmMinute,
+    settings.alarmDays,
     settings.temperatureUnit,
   ]);
 
