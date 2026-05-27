@@ -89,9 +89,14 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [weather]);
 
-  /* ── Re-schedule notifications (daily + alarms) when anything changes ── */
+  /* ── Re-schedule notifications (daily + alarms + smart tips) ── */
   useEffect(() => {
-    if (!settings.notificationsEnabled && !settings.alarmEnabled) {
+    const anyEnabled =
+      settings.notificationsEnabled ||
+      settings.alarmEnabled ||
+      settings.smartTipsEnabled;
+
+    if (!anyEnabled) {
       cancelAllNotifications();
       return;
     }
@@ -100,13 +105,16 @@ const HomeScreen = ({ navigation }) => {
         weather,
         cityInfo,
         quote,
-        unit:         settings.temperatureUnit,
-        dailyEnabled: settings.notificationsEnabled,
-        dailyHour:    settings.notificationHour,
-        alarmEnabled: settings.alarmEnabled,
-        alarmHour:    settings.alarmHour,
-        alarmMinute:  settings.alarmMinute,
-        alarmDays:    settings.alarmDays,
+        unit:               settings.temperatureUnit,
+        dailyEnabled:       settings.notificationsEnabled,
+        dailyHour:          settings.notificationHour,
+        alarmEnabled:       settings.alarmEnabled,
+        alarmHour:          settings.alarmHour,
+        alarmMinute:        settings.alarmMinute,
+        alarmDays:          settings.alarmDays,
+        smartTipsEnabled:   settings.smartTipsEnabled,
+        smartTipsHour:      settings.smartTipsHour,
+        smartTipCategories: settings.smartTipCategories,
       });
     }
   }, [
@@ -119,6 +127,9 @@ const HomeScreen = ({ navigation }) => {
     settings.alarmHour,
     settings.alarmMinute,
     settings.alarmDays,
+    settings.smartTipsEnabled,
+    settings.smartTipsHour,
+    settings.smartTipCategories,
     settings.temperatureUnit,
   ]);
 
