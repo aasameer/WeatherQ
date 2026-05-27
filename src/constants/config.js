@@ -4,10 +4,11 @@ export const REVERSE_GEOCODING_BASE = 'https://nominatim.openstreetmap.org';
 export const QUOTES_API_URL = 'https://zenquotes.io/api/random';
 
 export const CACHE_KEYS = {
-  DAILY_QUOTE: 'weatherq_daily_quote',
+  DAILY_QUOTE:  'weatherq_daily_quote',
   LAST_WEATHER: 'weatherq_last_weather',
-  SETTINGS: 'weatherq_settings',
-  LAST_CITY: 'weatherq_last_city',
+  SETTINGS:     'weatherq_settings',
+  LAST_CITY:    'weatherq_last_city',
+  SAVED_CITIES: 'weatherq_saved_cities',
 };
 
 export const DEFAULT_SETTINGS = {

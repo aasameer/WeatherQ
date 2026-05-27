@@ -34,6 +34,30 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.4.0] — 2026-05-24
+
+### Added
+- **Multiple saved cities** — switch between Home, Work, Family, anywhere
+  - New "city chip" in the home top bar — tap to open the cities sheet
+  - Bottom-sheet picker shows all saved cities + "Current Location" entry
+  - Tap a row to switch · trash icon to remove (with confirmation)
+  - "+ Add a City" button → opens existing Search screen
+  - Active city + city list persist across app restarts via AsyncStorage
+- `src/hooks/useSavedCities.js` — add/remove/switch/rename API
+- `src/components/CitySwitcher.js` — animated modal sheet UI
+
+### Changed
+- HomeScreen now fetches weather based on the *active* saved city
+  (instead of always using device location)
+- `useLocation(autoRequest)` now only fires when the user is on
+  "Current Location" — avoids unnecessary GPS prompts when viewing a fixed city
+- Picking a city in Search now **saves** it (instead of single-use)
+- Pull-to-refresh respects the active city
+- Top bar layout: search · **city chip (tappable)** · settings
+  (removed the static date — date already shown on share cards)
+
+---
+
 ## [1.3.0] — 2026-05-24
 
 ### Added

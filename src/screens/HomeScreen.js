@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -21,17 +21,27 @@ import ErrorView         from '../components/ErrorView';
 import { useLocation }  from '../hooks/useLocation';
 import { useWeather }   from '../hooks/useWeather';
 import { useQuote }     from '../hooks/useQuote';
+import { useSavedCities, CURRENT_LOCATION_ID } from '../hooks/useSavedCities';
+import CitySwitcher     from '../components/CitySwitcher';
 import { useSettings }  from '../context/SettingsContext';
 import { getWeatherInfo } from '../utils/weatherHelpers';
-import { formatFullDate } from '../utils/dateHelpers';
 import { scheduleDailyNotifications, cancelAllNotifications } from '../utils/notifications';
 import { TEXT, GLASS }   from '../constants/colors';
 
 const HomeScreen = ({ navigation }) => {
-  const { settings }                                       = useSettings();
-  const { coords, loading: locLoading, denied, requestLocation } = useLocation();
+  const { settings } = useSettings();
+  const {
+    cities, activeId, activeCity, loaded: citiesLoaded,
+    addCity, removeCity, switchTo,
+  } = useSavedCities();
+
+  const isCurrentLocation = activeCity?.id === CURRENT_LOCATION_ID;
+
+  const { coords, loading: locLoading, denied, requestLocation } = useLocation(isCurrentLocation);
   const { weather, cityInfo, loading: wxLoading, error, fetchWeather, restoreFromCache } = useWeather();
   const { quote, loading: qLoading, loadQuote, refreshQuote } = useQuote();
+
+  const [switcherOpen, setSwitcherOpen] = useState(false);
 
   const contentOpacity = useRef(new Animated.Value(0)).current;
   const isLoading      = locLoading || wxLoading;
@@ -47,11 +57,28 @@ const HomeScreen = ({ navigation }) => {
     loadQuote(lang);
   }, [lang]);
 
+  /* ── Fetch weather based on active city ── */
   useEffect(() => {
-    if (coords) {
+    if (!citiesLoaded) return;
+
+    if (isCurrentLocation) {
+      // Coords arrive via useLocation; the next useEffect handles fetching.
+      if (coords) fetchWeather(coords.latitude, coords.longitude);
+    } else if (activeCity) {
+      fetchWeather(activeCity.latitude, activeCity.longitude, {
+        city:         activeCity.city,
+        country:      activeCity.country,
+        country_name: activeCity.country_name,
+      });
+    }
+  }, [citiesLoaded, activeId]);
+
+  /* ── Watch coords (only active when "current location" is selected) ── */
+  useEffect(() => {
+    if (isCurrentLocation && coords) {
       fetchWeather(coords.latitude, coords.longitude);
     }
-  }, [coords]);
+  }, [coords, isCurrentLocation]);
 
   /* ── Fade in once data is ready ── */
   useEffect(() => {
@@ -88,23 +115,33 @@ const HomeScreen = ({ navigation }) => {
 
   /* ── Pull-to-refresh ── */
   const onRefresh = useCallback(async () => {
-    if (coords) {
-      await fetchWeather(coords.latitude, coords.longitude);
-    } else {
-      const loc = await requestLocation();
-      if (loc) await fetchWeather(loc.latitude, loc.longitude);
+    if (isCurrentLocation) {
+      if (coords) {
+        await fetchWeather(coords.latitude, coords.longitude);
+      } else {
+        const loc = await requestLocation();
+        if (loc) await fetchWeather(loc.latitude, loc.longitude);
+      }
+    } else if (activeCity) {
+      await fetchWeather(activeCity.latitude, activeCity.longitude, {
+        city:         activeCity.city,
+        country:      activeCity.country,
+        country_name: activeCity.country_name,
+      });
     }
     await refreshQuote(lang);
-  }, [coords, lang, refreshQuote]);
+  }, [coords, isCurrentLocation, activeCity, lang, refreshQuote, fetchWeather, requestLocation]);
 
-  /* ── City selected from Search screen ── */
+  /* ── City picked from Search screen → save it AND switch to it ── */
   const handleCitySelect = useCallback(async (city) => {
-    await fetchWeather(city.latitude, city.longitude, {
-      city:         city.name,
-      country:      city.country,
-      country_name: city.country_name,
-    });
-  }, [fetchWeather]);
+    await addCity(city);  // useEffect on activeId will fetch its weather
+  }, [addCity]);
+
+  /* ── Open Search to add a new city ── */
+  const openAddCity = useCallback(() => {
+    setSwitcherOpen(false);
+    navigation.navigate('Search', { onSelect: handleCitySelect });
+  }, [navigation, handleCitySelect]);
 
   /* ── Location denied → ask user to search ── */
   if (denied && !weather) {
@@ -161,7 +198,21 @@ const HomeScreen = ({ navigation }) => {
             <Ionicons name="search-outline" size={24} color="rgba(255,255,255,0.85)" />
           </TouchableOpacity>
 
-          <Text style={styles.topDate}>{formatFullDate()}</Text>
+          <TouchableOpacity
+            onPress={() => setSwitcherOpen(true)}
+            style={styles.cityChip}
+            activeOpacity={0.75}
+            hitSlop={{ top: 6, bottom: 6, left: 12, right: 12 }}
+          >
+            <Ionicons
+              name={isCurrentLocation ? 'navigate' : 'location'}
+              size={14} color="rgba(255,255,255,0.85)" style={{ marginRight: 5 }}
+            />
+            <Text style={styles.cityChipText} numberOfLines={1}>
+              {cityInfo?.city || activeCity?.label || '—'}
+            </Text>
+            <Ionicons name="chevron-down" size={14} color="rgba(255,255,255,0.65)" style={{ marginLeft: 4 }} />
+          </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('Settings')}
@@ -171,6 +222,16 @@ const HomeScreen = ({ navigation }) => {
             <Ionicons name="settings-outline" size={24} color="rgba(255,255,255,0.85)" />
           </TouchableOpacity>
         </View>
+
+        <CitySwitcher
+          visible={switcherOpen}
+          cities={cities}
+          activeId={activeId}
+          onSelect={switchTo}
+          onAdd={openAddCity}
+          onRemove={removeCity}
+          onClose={() => setSwitcherOpen(false)}
+        />
 
         {/* ── Main scroll ── */}
         <Animated.ScrollView
@@ -242,10 +303,22 @@ const styles = StyleSheet.create({
     borderWidth:     1,
     borderColor:     GLASS.border,
   },
-  topDate: {
-    fontSize:   13,
-    color:      TEXT.secondary,
-    fontWeight: '500',
+  cityChip: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    backgroundColor:   GLASS.background,
+    borderWidth:       1,
+    borderColor:       GLASS.border,
+    borderRadius:      20,
+    paddingHorizontal: 14,
+    paddingVertical:   7,
+    maxWidth:          '60%',
+  },
+  cityChipText: {
+    fontSize:   14,
+    fontWeight: '700',
+    color:      TEXT.primary,
+    letterSpacing: 0.3,
   },
   scrollContent: {
     paddingHorizontal: 20,
