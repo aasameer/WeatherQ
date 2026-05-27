@@ -5,7 +5,7 @@ import { fetchWeatherByCoords } from '../api/weatherService';
 import { fetchRandomQuote } from '../api/quotesService';
 import { loadFromCache, saveToCache } from './cache';
 import { CACHE_KEYS, DEFAULT_SETTINGS } from '../constants/config';
-import { scheduleDailyNotifications } from './notifications';
+import { rescheduleAllNotifications } from './notifications';
 import { getTodayKey } from './dateHelpers';
 
 /**
@@ -36,7 +36,7 @@ TaskManager.defineTask(DAILY_REFRESH_TASK, async () => {
       ...(await loadFromCache(CACHE_KEYS.SETTINGS)),
     };
 
-    if (!settings.notificationsEnabled) {
+    if (!settings.notificationsEnabled && !settings.alarmEnabled) {
       return BackgroundFetch.BackgroundFetchResult.NoData;
     }
 
@@ -70,14 +70,18 @@ TaskManager.defineTask(DAILY_REFRESH_TASK, async () => {
       weather,
     });
 
-    /* 6. Reschedule the next 7 daily notifications with the FRESH content */
-    await scheduleDailyNotifications({
+    /* 6. Reschedule daily reminders + wake-up alarms with the FRESH content */
+    await rescheduleAllNotifications({
       weather,
-      cityInfo: cached.city,
+      cityInfo:     cached.city,
       quote,
-      unit:     settings.temperatureUnit,
-      hour:     settings.notificationHour,
-      days:     7,
+      unit:         settings.temperatureUnit,
+      dailyEnabled: settings.notificationsEnabled,
+      dailyHour:    settings.notificationHour,
+      alarmEnabled: settings.alarmEnabled,
+      alarmHour:    settings.alarmHour,
+      alarmMinute:  settings.alarmMinute,
+      alarmDays:    settings.alarmDays,
     });
 
     return BackgroundFetch.BackgroundFetchResult.NewData;
