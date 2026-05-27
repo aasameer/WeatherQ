@@ -113,6 +113,7 @@ const HomeScreen = ({ navigation }) => {
         alarmMinute:        settings.alarmMinute,
         alarmDays:          settings.alarmDays,
         smartTipsEnabled:   settings.smartTipsEnabled,
+        smartTipsMode:      settings.smartTipsMode,
         smartTipsHour:      settings.smartTipsHour,
         smartTipCategories: settings.smartTipCategories,
       });
@@ -128,6 +129,7 @@ const HomeScreen = ({ navigation }) => {
     settings.alarmMinute,
     settings.alarmDays,
     settings.smartTipsEnabled,
+    settings.smartTipsMode,
     settings.smartTipsHour,
     settings.smartTipCategories,
     settings.temperatureUnit,
