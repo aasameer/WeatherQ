@@ -34,6 +34,28 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.5.0] — 2026-05-24
+
+### Added
+- **Smart Wake-up Alarm** — wake up to today's weather + fresh quote
+  - Toggle in Settings → Wake-up Alarm
+  - Custom time picker (HH:MM, any time you want, not just preset hours)
+  - 7 day-of-week chips (Mon-Sun) for repeat schedule — defaults to weekdays
+  - Pretty summary like "6:30 AM · Weekdays" or "7:15 AM · Mon · Wed · Fri"
+  - Dedicated Android channel `wake-alarm` with HIGH importance, bypasses DnD,
+    custom vibration pattern (300/200/300/200/600 ms)
+  - iOS `interruptionLevel: timeSensitive` — pierces Focus modes
+  - Notification title prefixed with ⏰ and body contains the day's quote
+  - Fully integrated with background refresh — content stays fresh
+
+### Refactored
+- `notifications.js` → new `rescheduleAllNotifications()` handles both
+  daily reminders + weekly alarms in a single call
+- HomeScreen + backgroundTasks both call the new function
+- Old `scheduleDailyNotifications` kept as a back-compat alias
+
+---
+
 ## [1.4.0] — 2026-05-24
 
 ### Added
