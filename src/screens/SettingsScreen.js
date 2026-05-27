@@ -408,7 +408,9 @@ const SettingsScreen = ({ navigation }) => {
               label="Daily Smart Tips"
               subtitle={
                 settings.smartTipsEnabled
-                  ? `Every day at ${formatHourLabel(settings.smartTipsHour)} · ${activeTips.length} active`
+                  ? settings.smartTipsMode === 'smart'
+                    ? `Smart delivery · ${activeTips.length} active`
+                    : `Every day at ${formatHourLabel(settings.smartTipsHour)} · ${activeTips.length} active`
                   : 'Personalized tips based on today\'s weather'
               }
               isLast={!settings.smartTipsEnabled}
@@ -425,25 +427,70 @@ const SettingsScreen = ({ navigation }) => {
 
             {settings.smartTipsEnabled && (
               <View style={styles.alarmConfig}>
-                {/* Hour chips */}
-                <Text style={styles.hourPickerLabel}>Delivery time</Text>
-                <View style={styles.hourGrid}>
-                  {NOTIFICATION_HOURS.map((h) => {
-                    const active = settings.smartTipsHour === h;
-                    return (
-                      <TouchableOpacity
-                        key={h}
-                        style={[styles.hourChip, active && styles.hourChipActive]}
-                        onPress={() => updateSettings({ smartTipsHour: h })}
-                        activeOpacity={0.75}
-                      >
-                        <Text style={[styles.hourChipText, active && styles.hourChipTextActive]}>
-                          {formatHourLabel(h)}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                {/* Mode selector — Smart vs Fixed */}
+                <Text style={styles.hourPickerLabel}>Delivery</Text>
+                <View style={styles.modeRow}>
+                  <TouchableOpacity
+                    style={[styles.modeBtn, settings.smartTipsMode === 'smart' && styles.modeBtnActive]}
+                    onPress={() => updateSettings({ smartTipsMode: 'smart' })}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons
+                      name="sparkles"
+                      size={14}
+                      color={settings.smartTipsMode === 'smart' ? '#FFF' : TEXT.muted}
+                      style={{ marginRight: 4 }}
+                    />
+                    <Text style={[styles.modeBtnText, settings.smartTipsMode === 'smart' && styles.modeBtnTextActive]}>
+                      Smart
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modeBtn, settings.smartTipsMode === 'fixed' && styles.modeBtnActive]}
+                    onPress={() => updateSettings({ smartTipsMode: 'fixed' })}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons
+                      name="time-outline"
+                      size={14}
+                      color={settings.smartTipsMode === 'fixed' ? '#FFF' : TEXT.muted}
+                      style={{ marginRight: 4 }}
+                    />
+                    <Text style={[styles.modeBtnText, settings.smartTipsMode === 'fixed' && styles.modeBtnTextActive]}>
+                      Fixed time
+                    </Text>
+                  </TouchableOpacity>
                 </View>
+
+                {settings.smartTipsMode === 'smart' ? (
+                  <View style={styles.smartHint}>
+                    <Text style={styles.smartHintText}>
+                      ✨ Morning briefing at 7 AM, plus urgent alerts (storms, heatwave,
+                      black ice…) at midday, afternoon, and evening when they matter.
+                    </Text>
+                  </View>
+                ) : (
+                  <>
+                    <Text style={[styles.hourPickerLabel, { marginTop: 12 }]}>Delivery time</Text>
+                    <View style={styles.hourGrid}>
+                      {NOTIFICATION_HOURS.map((h) => {
+                        const active = settings.smartTipsHour === h;
+                        return (
+                          <TouchableOpacity
+                            key={h}
+                            style={[styles.hourChip, active && styles.hourChipActive]}
+                            onPress={() => updateSettings({ smartTipsHour: h })}
+                            activeOpacity={0.75}
+                          >
+                            <Text style={[styles.hourChipText, active && styles.hourChipTextActive]}>
+                              {formatHourLabel(h)}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </>
+                )}
 
                 {/* Categories */}
                 <Text style={[styles.hourPickerLabel, { marginTop: 14 }]}>Categories</Text>
@@ -790,6 +837,32 @@ const styles = StyleSheet.create({
     color:     TEXT.muted,
     textAlign: 'center',
     lineHeight: 16,
+  },
+
+  /* Smart Tips mode selector */
+  modeRow: {
+    flexDirection: 'row', gap: 8, marginTop: 8,
+  },
+  modeBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 10, borderRadius: 12,
+    backgroundColor: GLASS.background,
+    borderWidth: 1, borderColor: GLASS.border,
+  },
+  modeBtnActive: {
+    backgroundColor: 'rgba(99,179,237,0.30)',
+    borderColor:     'rgba(99,179,237,0.65)',
+  },
+  modeBtnText:       { fontSize: 13, fontWeight: '600', color: TEXT.muted },
+  modeBtnTextActive: { color: '#FFF', fontWeight: '700' },
+
+  smartHint: {
+    backgroundColor: 'rgba(99,179,237,0.10)',
+    borderRadius:    10, padding: 12, marginTop: 10,
+    borderWidth: 1, borderColor: 'rgba(99,179,237,0.20)',
+  },
+  smartHintText: {
+    fontSize: 12, color: 'rgba(255,255,255,0.78)', lineHeight: 18,
   },
 
   /* Smart Tips */
