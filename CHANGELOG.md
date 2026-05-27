@@ -34,6 +34,22 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.7.1] — 2026-05-24
+
+### Fixed
+- Quiet Hours subtitle text was overlapping with the toggle switch.
+  Subtitle now shows only the time range; the safety-alert explanation
+  moved to the dedicated hint card below the toggles.
+
+### Added
+- **Rate WeatherQ** in Settings → Info is now wired to the live
+  Play Store listing for `com.weatherq.app`:
+  - Android → opens `market://details?id=…` directly
+  - iOS → opens "Write Review" sheet (once App Store ID is set)
+  - Graceful fallback to web Play Store URL if `market://` unavailable
+
+---
+
 ## [1.7.0] — 2026-05-24
 
 ### Added — Anti-Spam Coordination
