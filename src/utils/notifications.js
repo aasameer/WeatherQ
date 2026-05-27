@@ -127,6 +127,19 @@ const SMART_SLOTS = [
 // heatwave, black ice, fog, severe wind, freezing pipes, no-car-pets…)
 const URGENT_PRIORITY = 80;
 
+// Tips are "critical" — bypass quiet hours (severe storm, heatstroke, etc.)
+const CRITICAL_PRIORITY = 95;
+
+/* ── Quiet hours check ───────────────────────────────────────────────── */
+const inQuietHours = (hour, { enabled, start, end }) => {
+  if (!enabled) return false;
+  if (start === end) return false;
+  // Range crosses midnight (e.g., 22 → 6)
+  if (start > end) return hour >= start || hour < end;
+  // Same-day range (e.g., 1 → 5)
+  return hour >= start && hour < end;
+};
+
 const scheduleSmartTipOne = async ({ fireAt, title, body }) => {
   await Notifications.scheduleNotificationAsync({
     content: {
@@ -160,13 +173,17 @@ const scheduleSmartTipsFixed = async ({ weather, city, categories, hour, days = 
   }
 };
 
-/* ── SMART mode — multiple time slots, only urgent fires outside briefing ─ */
-const scheduleSmartTipsSmart = async ({ weather, city, categories, days = 7 }) => {
+/* ── SMART mode — multi-slot, with quiet hours + briefing-skip rules ─── */
+const scheduleSmartTipsSmart = async ({
+  weather, city, categories, days = 7,
+  quietHours = { enabled: false }, skipBriefing = false,
+}) => {
   const allTips = getActiveTips(weather, categories, 5);
   if (!allTips.length) return;
 
   const briefing = allTips.slice(0, 3);
   const urgent   = allTips.find((t) => t.priority >= URGENT_PRIORITY);
+  const critical = allTips.find((t) => t.priority >= CRITICAL_PRIORITY);
 
   const briefingTitle = city ? `💡 Today's Tips for ${city}` : "💡 Today's Smart Tips";
   const briefingBody  = formatTipsForNotification(briefing);
@@ -181,7 +198,13 @@ const scheduleSmartTipsSmart = async ({ weather, city, categories, days = 7 }) =
       fireAt.setDate(now.getDate() + i);
       fireAt.setHours(slot.hour, 0, 0, 0);
 
+      // Critical tips ALWAYS pass through; everything else respects quiet hours
+      const isQuiet = inQuietHours(slot.hour, quietHours);
+      if (isQuiet && !critical) continue;
+
       if (slot.type === 'briefing') {
+        if (skipBriefing) continue;        // alarm fires nearby — skip the briefing
+        if (isQuiet) continue;             // briefing is never critical
         await scheduleSmartTipOne({ fireAt, title: briefingTitle, body: briefingBody });
       } else if (slot.type === 'urgent-only' && urgent) {
         await scheduleSmartTipOne({ fireAt, title: urgentTitle, body: urgentBody });
@@ -190,13 +213,9 @@ const scheduleSmartTipsSmart = async ({ weather, city, categories, days = 7 }) =
   }
 };
 
-/* ── Smart Tips dispatcher ───────────────────────────────────────────── */
-const scheduleSmartTips = async ({ weather, city, categories, mode = 'smart', hour, days }) => {
-  if (mode === 'fixed') {
-    return scheduleSmartTipsFixed({ weather, city, categories, hour, days });
-  }
-  return scheduleSmartTipsSmart({ weather, city, categories, days });
-};
+/* Smart Tips dispatcher removed — rescheduleAllNotifications now
+ * inlines the smart/fixed routing so it can apply consolidation
+ * rules (e.g. skip briefing when alarm fires nearby). */
 
 /* ── Schedule weekly wake-up alarms ───────────────────────────────────── */
 const scheduleWakeupAlarms = async ({ titleBase, body, hour, minute, days }) => {
@@ -245,13 +264,39 @@ export const rescheduleAllNotifications = async ({
   smartTipsMode       = 'smart',
   smartTipsHour       = 7,
   smartTipCategories  = [],
+  // Anti-spam coordination
+  smartConsolidation  = true,
+  quietHoursEnabled   = true,
+  quietHoursStart     = 22,
+  quietHoursEnd       = 6,
 }) => {
   await ensureChannels();
   await Notifications.cancelAllScheduledNotificationsAsync();
 
   const content = buildContent(weather, cityInfo, quote, unit);
+  const quietHours = {
+    enabled: quietHoursEnabled,
+    start:   quietHoursStart,
+    end:     quietHoursEnd,
+  };
 
-  if (dailyEnabled) {
+  /* ─── Coordination rules ───────────────────────────────────────────── */
+  // 1. If Smart Tips is on AND smart consolidation is on, the basic daily
+  //    reminder is redundant (smart tips morning briefing already covers it)
+  const effectiveDailyEnabled =
+    dailyEnabled && !(smartConsolidation && smartTipsEnabled);
+
+  // 2. If a wake-up alarm fires within 90 min of the 7 AM smart tips briefing
+  //    AND smart consolidation is on, skip the briefing (alarm already wakes you)
+  let skipSmartBriefing = false;
+  if (smartConsolidation && alarmEnabled && smartTipsEnabled && smartTipsMode === 'smart' && alarmDays?.length) {
+    const briefingMinutes = 7 * 60;
+    const alarmMinutes    = alarmHour * 60 + alarmMinute;
+    skipSmartBriefing     = Math.abs(briefingMinutes - alarmMinutes) <= 90;
+  }
+  /* ──────────────────────────────────────────────────────────────────── */
+
+  if (effectiveDailyEnabled && !inQuietHours(dailyHour, quietHours)) {
     await scheduleDailyReminders({
       titleBase: content.titleBase,
       body:      content.body,
@@ -260,6 +305,7 @@ export const rescheduleAllNotifications = async ({
   }
 
   if (alarmEnabled && alarmDays?.length) {
+    // Alarms always fire — user explicitly set the time
     await scheduleWakeupAlarms({
       titleBase: content.titleBase,
       body:      content.body,
@@ -270,13 +316,25 @@ export const rescheduleAllNotifications = async ({
   }
 
   if (smartTipsEnabled && weather) {
-    await scheduleSmartTips({
-      weather,
-      city:       cityInfo?.city,
-      categories: smartTipCategories,
-      mode:       smartTipsMode,
-      hour:       smartTipsHour,
-    });
+    if (smartTipsMode === 'fixed') {
+      // Honor quiet hours for fixed-mode delivery
+      if (!inQuietHours(smartTipsHour, quietHours)) {
+        await scheduleSmartTipsFixed({
+          weather,
+          city:       cityInfo?.city,
+          categories: smartTipCategories,
+          hour:       smartTipsHour,
+        });
+      }
+    } else {
+      await scheduleSmartTipsSmart({
+        weather,
+        city:       cityInfo?.city,
+        categories: smartTipCategories,
+        quietHours,
+        skipBriefing: skipSmartBriefing,
+      });
+    }
   }
 };
 

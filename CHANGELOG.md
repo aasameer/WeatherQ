@@ -34,6 +34,33 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.7.0] — 2026-05-24
+
+### Added — Anti-Spam Coordination
+- **Smart Consolidation** (default ON) — auto-suppresses overlapping
+  notifications so the user is never flooded:
+  - If Smart Tips is on, the basic Daily Reminder is auto-skipped
+    (they're redundant — both show weather and a daily message)
+  - If Wake-up Alarm fires within 90 min of the 7 AM Smart Tips briefing,
+    the briefing is skipped (alarm already serves morning purpose)
+- **Quiet Hours** (default 10 PM → 6 AM) — no non-critical notifications
+  during sleep:
+  - Wake-up alarm always fires (user explicitly set the time)
+  - Critical alerts (priority ≥ 95) bypass quiet hours — severe storms,
+    heatstroke warnings, etc.
+  - All other notifications skipped during quiet window
+- New Settings → "Don't Bother Me" section with both toggles + a live
+  explainer card showing which rules are active
+
+### Internals
+- `inQuietHours(hour, config)` helper — handles ranges crossing midnight
+- `rescheduleAllNotifications()` extended with `smartConsolidation`,
+  `quietHoursEnabled`, `quietHoursStart`, `quietHoursEnd`
+- Critical-priority tips (≥ 95) defined separately from "urgent" (≥ 80)
+  to allow life-safety alerts to bypass quiet hours
+
+---
+
 ## [1.6.1] — 2026-05-24
 
 ### Changed

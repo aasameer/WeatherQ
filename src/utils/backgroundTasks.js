@@ -86,6 +86,10 @@ TaskManager.defineTask(DAILY_REFRESH_TASK, async () => {
       smartTipsMode:      settings.smartTipsMode,
       smartTipsHour:      settings.smartTipsHour,
       smartTipCategories: settings.smartTipCategories,
+      smartConsolidation: settings.smartConsolidation,
+      quietHoursEnabled:  settings.quietHoursEnabled,
+      quietHoursStart:    settings.quietHoursStart,
+      quietHoursEnd:      settings.quietHoursEnd,
     });
 
     return BackgroundFetch.BackgroundFetchResult.NewData;
