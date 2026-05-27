@@ -116,6 +116,10 @@ const HomeScreen = ({ navigation }) => {
         smartTipsMode:      settings.smartTipsMode,
         smartTipsHour:      settings.smartTipsHour,
         smartTipCategories: settings.smartTipCategories,
+        smartConsolidation: settings.smartConsolidation,
+        quietHoursEnabled:  settings.quietHoursEnabled,
+        quietHoursStart:    settings.quietHoursStart,
+        quietHoursEnd:      settings.quietHoursEnd,
       });
     }
   }, [
@@ -132,6 +136,10 @@ const HomeScreen = ({ navigation }) => {
     settings.smartTipsMode,
     settings.smartTipsHour,
     settings.smartTipCategories,
+    settings.smartConsolidation,
+    settings.quietHoursEnabled,
+    settings.quietHoursStart,
+    settings.quietHoursEnd,
     settings.temperatureUnit,
   ]);
 
