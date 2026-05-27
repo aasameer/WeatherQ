@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { getWeatherInfo, formatTemperatureWithUnit } from './weatherHelpers';
+import { getActiveTips, formatTipsForNotification } from './smartRecommendations';
 
 /* ── Foreground display behaviour ─────────────────────────────────────── */
 Notifications.setNotificationHandler({
@@ -22,6 +23,15 @@ const ensureChannels = async () => {
     lightColor:  '#3B8FD4',
     sound:       'default',
     description: 'Your daily weather snapshot with an inspirational quote.',
+  });
+
+  // Smart tips channel — low-key informational
+  await Notifications.setNotificationChannelAsync('smart-tips', {
+    name:        'Smart Weather Tips',
+    importance:  Notifications.AndroidImportance.DEFAULT,
+    lightColor:  '#63B3ED',
+    sound:       'default',
+    description: 'Personalized tips based on today\'s weather.',
   });
 
   // Alarm channel — high importance, alarm-style sound (rings even in silent mode)
@@ -103,6 +113,36 @@ const scheduleDailyReminders = async ({ titleBase, body, hour, days = 7 }) => {
   }
 };
 
+/* ── Schedule daily smart tips notification ──────────────────────────── */
+const scheduleSmartTips = async ({ weather, city, categories, hour, days = 7 }) => {
+  const tips = getActiveTips(weather, categories, 3);
+  if (!tips.length) return;
+
+  const body  = formatTipsForNotification(tips);
+  const title = city ? `💡 Today's Tips for ${city}` : '💡 Today\'s Smart Tips';
+
+  const now = new Date();
+  for (let i = 1; i <= days; i += 1) {
+    const fireAt = new Date(now);
+    fireAt.setDate(now.getDate() + i);
+    fireAt.setHours(hour, 0, 0, 0);
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: 'default',
+        data:  { type: 'smart-tips' },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: fireAt,
+        channelId: Platform.OS === 'android' ? 'smart-tips' : undefined,
+      },
+    });
+  }
+};
+
 /* ── Schedule weekly wake-up alarms ───────────────────────────────────── */
 const scheduleWakeupAlarms = async ({ titleBase, body, hour, minute, days }) => {
   if (!days?.length) return;
@@ -146,6 +186,9 @@ export const rescheduleAllNotifications = async ({
   alarmHour    = 6,
   alarmMinute  = 30,
   alarmDays    = [],
+  smartTipsEnabled    = false,
+  smartTipsHour       = 7,
+  smartTipCategories  = [],
 }) => {
   await ensureChannels();
   await Notifications.cancelAllScheduledNotificationsAsync();
@@ -167,6 +210,15 @@ export const rescheduleAllNotifications = async ({
       hour:      alarmHour,
       minute:    alarmMinute,
       days:      alarmDays,
+    });
+  }
+
+  if (smartTipsEnabled && weather) {
+    await scheduleSmartTips({
+      weather,
+      city:       cityInfo?.city,
+      categories: smartTipCategories,
+      hour:       smartTipsHour,
     });
   }
 };

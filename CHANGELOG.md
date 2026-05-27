@@ -34,6 +34,28 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.6.0] — 2026-05-24
+
+### Added
+- **Smart Weather Tips** — daily notification with personalized tips
+  based on today's actual weather (no UI clutter on home screen)
+- 40+ rules across 8 categories: Clothing, Activities, Driving,
+  Health, Home, Mood, Pets, Sleep
+  - Priority-ranked (severe weather like storms, black ice always shown first)
+  - Each rule evaluates `tempC`, `feelsC`, `weather_code`, `humidity`,
+    `wind`, `isDay`, daily highs/lows
+- New Settings → Smart Tips section:
+  - Toggle on/off (requests notification permission)
+  - Delivery time picker (chip-based hours)
+  - **8 category chips** — tap to include/exclude each category
+  - **Live preview** card — shows the tips that would fire RIGHT NOW
+    for the current city/weather (updates when you toggle categories)
+- Notification format: "💡 Today's Tips for <city>" + up to 3 bulleted tips
+- Android: dedicated `smart-tips` channel (DEFAULT importance)
+- Fully background-refreshes — tips reflect today's real weather
+
+---
+
 ## [1.5.0] — 2026-05-24
 
 ### Added
