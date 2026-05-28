@@ -49,7 +49,9 @@ const ShareScreen = ({ navigation, route }) => {
   const handleDownload = useCallback(async () => {
     setCapturing(true);
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      // writeOnly=true → only requests "save to library" access,
+      // never the broad READ_MEDIA_IMAGES permission (Play Store policy)
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== 'granted') {
         Alert.alert('Permission needed', 'Allow photo library access to save the image.');
         return;
