@@ -2,7 +2,7 @@
   "expo": {
     "name": "WeatherQ",
     "slug": "weatherq",
-    "version": "1.7.1",
+    "version": "1.7.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -51,17 +51,14 @@
       "package": "com.weatherq.app",
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "READ_MEDIA_IMAGES",
-        "WRITE_EXTERNAL_STORAGE",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "blockedPermissions": [
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO",
-        "android.permission.READ_MEDIA_AUDIO"
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
       ]
     },
     "web": {
@@ -78,7 +75,8 @@
         "expo-media-library",
         {
           "photosPermission": "Allow WeatherQ to save weather quote cards to your photo library.",
-          "savePhotosPermission": "Allow WeatherQ to save weather quote cards to your photo library."
+          "savePhotosPermission": "Allow WeatherQ to save weather quote cards to your photo library.",
+          "isPhotosAccessRequired": false
         }
       ],
       [

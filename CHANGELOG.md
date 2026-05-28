@@ -34,6 +34,22 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.7.2] — 2026-05-27
+
+### Fixed — Play Store Policy Compliance
+- **Removed invalid media permissions** flagged by Google Play:
+  - WeatherQ only SAVES share cards (write) — it never reads the
+    user's photos/videos, so READ_MEDIA_IMAGES / READ_MEDIA_VIDEO /
+    READ_MEDIA_AUDIO / READ_EXTERNAL_STORAGE / READ_MEDIA_VISUAL_USER_SELECTED
+    are now explicitly blocked via `android.blockedPermissions`
+  - Cleaned up the bloated auto-generated permissions array down to
+    just ACCESS_FINE_LOCATION + ACCESS_COARSE_LOCATION
+  - `MediaLibrary.requestPermissionsAsync(true)` → write-only request
+  - `expo-media-library` plugin: `isPhotosAccessRequired: false`
+- Saving cards still works perfectly (uses scoped MediaStore on Android 10+)
+
+---
+
 ## [1.7.1] — 2026-05-24
 
 ### Fixed
