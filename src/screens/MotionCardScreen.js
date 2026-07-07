@@ -11,6 +11,7 @@ import { ShareCardStory } from '../components/ShareCard';
 import WeatherBackground from '../components/WeatherBackground';
 import { DEFAULT_TEMPLATE } from '../constants/cardTemplates';
 import { getWeatherInfo } from '../utils/weatherHelpers';
+import { isMotionCardUnlocked } from '../utils/featureUnlocks';
 import { TEXT, GLASS } from '../constants/colors';
 
 /**
@@ -24,6 +25,13 @@ const MotionCardScreen = ({ navigation, route }) => {
   const { weather, cityInfo, quote, unit } = route.params ?? {};
 
   const [showGuide, setShowGuide] = useState(true);
+
+  // Deep-link safety: if somebody navigates here without unlocking, bounce
+  useEffect(() => {
+    isMotionCardUnlocked().then((ok) => {
+      if (!ok) navigation.goBack();
+    });
+  }, [navigation]);
 
   const scale       = useRef(new Animated.Value(1)).current;
   const shimmerX    = useRef(new Animated.Value(0)).current;

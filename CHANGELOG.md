@@ -34,6 +34,31 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.8.1] — 2026-05-28
+
+### Added — Growth Loop
+- **🔒 Motion Card is now unlockable via referral.** Users must invite
+  at least one friend (share the app) to unlock the animated
+  Motion Card format. This turns Motion Card from a nice-to-have into
+  a viral growth engine.
+- New util: `src/utils/featureUnlocks.js` — persistent unlock state
+  (motionCard flag + friendsInvited counter). Sticky: once unlocked,
+  stays unlocked.
+- `shareWeatherQ()` now calls `registerFriendInvite()` — sharing the
+  app is what unlocks it.
+- ShareScreen shows a locked variant of the Motion Card button:
+  🔒 "Motion Card — invite 1 friend to unlock"
+- Tapping locked button opens a friendly unlock modal:
+  - Animated card explanation
+  - Perks list (Animated preview · Screen record · Unlocked forever)
+  - "Invite a friend now" primary CTA → opens native share sheet
+  - After successful share, celebratory "🎉 Unlocked!" alert with
+    "Open Motion Card" CTA
+- MotionCardScreen defensively bounces back if opened without unlock
+  (deep-link safety).
+
+---
+
 ## [1.8.0] — 2026-05-28
 
 ### Added
