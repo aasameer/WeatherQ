@@ -26,6 +26,7 @@ import CitySwitcher     from '../components/CitySwitcher';
 import { useSettings }  from '../context/SettingsContext';
 import { getWeatherInfo } from '../utils/weatherHelpers';
 import { rescheduleAllNotifications, cancelAllNotifications } from '../utils/notifications';
+import { maybePromptForRating, registerPositiveAction } from '../utils/rateApp';
 import { TEXT, GLASS }   from '../constants/colors';
 
 const HomeScreen = ({ navigation }) => {
@@ -86,6 +87,10 @@ const HomeScreen = ({ navigation }) => {
       Animated.timing(contentOpacity, {
         toValue: 1, duration: 600, useNativeDriver: true,
       }).start();
+      // Successful launch counts as a positive action
+      registerPositiveAction();
+      // Ask for a review at the right moment (rate-limited internally)
+      setTimeout(() => maybePromptForRating(), 4000);
     }
   }, [weather]);
 

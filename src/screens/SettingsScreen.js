@@ -23,6 +23,8 @@ import { SUPPORTED_LANGUAGES, getLanguageMeta } from '../constants/quotes';
 import { requestNotificationPermission, cancelAllNotifications } from '../utils/notifications';
 import { getActiveTips, TIP_CATEGORIES } from '../utils/smartRecommendations';
 import { adsAvailable, getAdsDebugInfo, maybeShowShareInterstitial } from '../ads/AdService';
+import { openStoreRating as openStoreRatingUtil } from '../utils/rateApp';
+import { shareWeatherQ } from '../utils/referral';
 
 const SectionHeader = ({ title }) => (
   <Text style={styles.sectionHeader}>{title}</Text>
@@ -75,33 +77,8 @@ const WEEKDAYS = [
   { id: 1, label: 'Sun' },
 ];
 
-/* ─── Store rating deep-link ──────────────────────────────────────────── */
-// Android package name matches app.json android.package
-// iOS App ID will be filled in once the app is approved on the App Store
-const PLAY_STORE_PACKAGE = 'com.weatherq.app';
-const APP_STORE_ID       = null; // e.g. '1234567890' once approved
-
-const openStoreRating = async () => {
-  try {
-    if (Platform.OS === 'android') {
-      // market://… first (opens Play Store app directly); fall back to web
-      const marketUrl = `market://details?id=${PLAY_STORE_PACKAGE}`;
-      const webUrl    = `https://play.google.com/store/apps/details?id=${PLAY_STORE_PACKAGE}`;
-      const canOpen = await Linking.canOpenURL(marketUrl);
-      await Linking.openURL(canOpen ? marketUrl : webUrl);
-    } else if (Platform.OS === 'ios' && APP_STORE_ID) {
-      // Opens App Store directly on the Reviews tab
-      await Linking.openURL(`itms-apps://apps.apple.com/app/id${APP_STORE_ID}?action=write-review`);
-    } else {
-      Alert.alert(
-        'Coming soon!',
-        'WeatherQ for iOS is still under review. Try again in a few days.'
-      );
-    }
-  } catch (e) {
-    Alert.alert('Could not open store', e?.message ?? 'Please try again later.');
-  }
-};
+/* store rating now lives in src/utils/rateApp.js */
+const openStoreRating = openStoreRatingUtil;
 
 const summariseDays = (days = []) => {
   if (!days.length) return 'No days selected';
@@ -672,6 +649,24 @@ const SettingsScreen = ({ navigation }) => {
               subtitle="Remove saved weather & quote data"
               onPress={handleClearCache}
               isLast
+            />
+          </View>
+
+          {/* Ambient + Share */}
+          <SectionHeader title="Extras" />
+          <View style={styles.card}>
+            <SettingsRow
+              icon="musical-notes-outline"
+              label="Ambient Sounds"
+              subtitle="Rain, ocean, fireplace — for focus & sleep"
+              onPress={() => navigation.navigate('Ambient')}
+            />
+            <SettingsRow
+              icon="paper-plane-outline"
+              label="Invite Friends"
+              subtitle="Share WeatherQ with a card sample"
+              isLast
+              onPress={() => shareWeatherQ({ cityName: cachedWeather?.city?.city })}
             />
           </View>
 

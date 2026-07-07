@@ -21,6 +21,7 @@ import WeatherBackground from '../components/WeatherBackground';
 import { CARD_TEMPLATES, DEFAULT_TEMPLATE } from '../constants/cardTemplates';
 import { getWeatherInfo } from '../utils/weatherHelpers';
 import { maybeShowShareInterstitial } from '../ads/AdService';
+import { registerPositiveAction } from '../utils/rateApp';
 import { TEXT, GLASS } from '../constants/colors';
 
 const FORMATS = [
@@ -60,6 +61,7 @@ const ShareScreen = ({ navigation, route }) => {
       if (!uri) throw new Error('Capture failed');
       await MediaLibrary.saveToLibraryAsync(uri);
       Alert.alert('Saved! 🎉', 'Weather card saved to your photo library.');
+      registerPositiveAction();
       maybeShowShareInterstitial();
     } catch (e) {
       Alert.alert('Error', e.message ?? 'Could not save the image.');
@@ -83,6 +85,7 @@ const ShareScreen = ({ navigation, route }) => {
         dialogTitle: 'Share your weather card',
         UTI:         'public.png',
       });
+      registerPositiveAction();
       maybeShowShareInterstitial();
     } catch (e) {
       Alert.alert('Error', e.message ?? 'Could not share the image.');
@@ -207,6 +210,15 @@ const ShareScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           </View>
 
+          <TouchableOpacity
+            style={styles.motionBtn}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('MotionCard', { weather, cityInfo, quote, unit })}
+          >
+            <Ionicons name="videocam-outline" size={16} color="#FFF" style={{ marginRight: 6 }} />
+            <Text style={styles.motionBtnText}>Try Motion Card — animated version for Reels & TikTok</Text>
+          </TouchableOpacity>
+
           <Text style={styles.hint}>
             Tip: Use "Story" format for Instagram Stories, WhatsApp Status, and TikTok.
           </Text>
@@ -292,6 +304,14 @@ const styles = StyleSheet.create({
   downloadBtn: { backgroundColor: GLASS.background, borderColor: GLASS.border },
   shareBtn:    { backgroundColor: 'rgba(99,179,237,0.25)', borderColor: 'rgba(99,179,237,0.5)' },
   actionText:  { fontSize: 15, fontWeight: '600', color: '#FFF' },
+  motionBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    marginTop: 12, marginBottom: 20,
+    paddingVertical: 12, borderRadius: 14,
+    backgroundColor: 'rgba(239,68,68,0.20)',
+    borderColor: 'rgba(239,68,68,0.55)', borderWidth: 1,
+  },
+  motionBtnText: { fontSize: 13, color: '#FFF', fontWeight: '600' },
   hint: { fontSize: 12, color: TEXT.muted, textAlign: 'center', lineHeight: 18 },
 });
 
