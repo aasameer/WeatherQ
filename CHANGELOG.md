@@ -34,6 +34,41 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.8.0] — 2026-05-28
+
+### Added
+- **🎥 Motion Card** — animated version of the story share card with
+  subtle pulse + horizontal shimmer sweep. New "Motion Card" button on
+  the Share screen opens a full-screen preview with a step-by-step
+  guide for iOS/Android screen recording (iOS Control Center · Android
+  quick-settings tile). Perfect for Reels, TikTok, and Stories.
+- **🎵 Ambient Sounds** — new dedicated screen (Settings → Extras →
+  Ambient Sounds) with 6 loops:
+    🌧 Gentle Rain · 🌊 Ocean Waves · 🔥 Fireplace ·
+    🌲 Forest Birds · ☕ Coffee Shop · 📻 White Noise
+  Sleep timer (10 min · 30 min · 1 h · 2 h). Streams via `expo-av`,
+  plays in background, ducks other audio on Android.
+- **💌 Invite Friends** — Settings → Extras → "Invite Friends" opens the
+  native share sheet with a personalized message and Play Store link.
+  (Card-image attachment scaffold in `src/utils/referral.js` — ready
+  for wiring to the ShareCard renderer next.)
+- **⭐ Smart Rate Prompt** — new `src/utils/rateApp.js` with:
+    · in-app native review (via `expo-store-review`) when available
+    · fallback friendly Alert with direct Play Store link
+    · smart throttling: 3+ positive actions (share/save/launch),
+      3+ days after install, 60+ days between prompts, 90+ days
+      cool-off after dismissal
+  Positive actions are logged on successful weather load + share + save.
+
+### Changed
+- Settings' `Rate WeatherQ` row now delegates to `src/utils/rateApp.js`
+  so smart prompting and manual tapping use the same code path.
+- New Settings section "Extras" between Notifications and Info.
+
+Co-Authored-By: Digital Development Pioneers <noreply@devpioneers.sa>
+
+---
+
 ## [1.7.2] — 2026-05-27
 
 ### Fixed — Play Store Policy Compliance
