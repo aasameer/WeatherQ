@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, StatusBar, StyleSheet, Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,6 +16,8 @@ const AmbientScreen = ({ navigation }) => {
   const [loading,  setLoading]  = useState(false);
   const [timerMin, setTimerMin] = useState(0);
   const [remaining, setRemaining] = useState(0);
+  const [errorId,  setErrorId]  = useState(null);      // sound.id that failed
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const soundRef      = useRef(null);
   const timerRef      = useRef(null);
@@ -59,19 +62,57 @@ const AmbientScreen = ({ navigation }) => {
     }, minutes * 60 * 1000);
   };
 
+  /**
+   * Try the primary URL first, then the fallback if it fails.
+   * On any player error, show a friendly retry state — never crash.
+   */
+  const tryLoad = async (uri) => {
+    const { sound: player } = await Audio.Sound.createAsync(
+      { uri },
+      { shouldPlay: true, isLooping: true, volume: 0.7 },
+      (status) => {
+        // Fires on runtime playback errors (e.g. network drops mid-play)
+        if (status?.error) {
+          console.warn('[Ambient] playback error:', status.error);
+        }
+      }
+    );
+    return player;
+  };
+
   const play = useCallback(async (sound) => {
     setLoading(true);
+    setErrorId(null);
+    setErrorMsg(null);
     try {
       await stopAndUnload();
-      const { sound: player } = await Audio.Sound.createAsync(
-        { uri: sound.url },
-        { shouldPlay: true, isLooping: true, volume: 0.7 }
-      );
+
+      let player = null;
+      try {
+        player = await tryLoad(sound.url);
+      } catch (primaryErr) {
+        // Primary URL failed → try the fallback
+        if (sound.fallback) {
+          try {
+            player = await tryLoad(sound.fallback);
+          } catch (fallbackErr) {
+            throw fallbackErr;
+          }
+        } else {
+          throw primaryErr;
+        }
+      }
+
       soundRef.current = player;
       setActiveId(sound.id);
       if (timerMin > 0) startTimer(timerMin);
     } catch (e) {
-      Alert.alert('Could not play sound', e?.message ?? 'Please try again.');
+      // Never crash — show a friendly inline state instead
+      const msg = /network|internet|host|resolve/i.test(String(e?.message))
+        ? 'No internet — check your connection and try again.'
+        : 'Sound file unavailable — please try another.';
+      setErrorId(sound.id);
+      setErrorMsg(msg);
       setActiveId(null);
     } finally {
       setLoading(false);
@@ -141,15 +182,37 @@ const AmbientScreen = ({ navigation }) => {
             </View>
           )}
 
+          {/* Friendly error banner */}
+          {errorId && (
+            <View style={styles.errorBanner}>
+              <Ionicons name="cloud-offline-outline" size={20} color="#FCA5A5" style={{ marginRight: 8 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.errorText}>{errorMsg}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setErrorId(null)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="close" size={18} color="rgba(255,255,255,0.6)" />
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Sound cards */}
           <Text style={styles.sectionLabel}>SOUNDS</Text>
           <View style={styles.grid}>
             {AMBIENT_SOUNDS.map((sound) => {
-              const isActive = activeId === sound.id;
+              const isActive  = activeId === sound.id;
+              const isLoading = loading && !activeId;
+              const hasError  = errorId === sound.id;
               return (
                 <TouchableOpacity
                   key={sound.id}
-                  style={[styles.card, isActive && styles.cardActive]}
+                  style={[
+                    styles.card,
+                    isActive && styles.cardActive,
+                    hasError && styles.cardError,
+                  ]}
                   onPress={() => (isActive ? stop() : play(sound))}
                   disabled={loading}
                   activeOpacity={0.8}
@@ -162,6 +225,16 @@ const AmbientScreen = ({ navigation }) => {
                     <View style={styles.playingBadge}>
                       <Ionicons name="volume-medium" size={12} color="#FFF" />
                       <Text style={styles.playingBadgeText}>Playing</Text>
+                    </View>
+                  )}
+                  {isLoading && (
+                    <View style={styles.playingBadge}>
+                      <ActivityIndicator size="small" color="#FFF" />
+                    </View>
+                  )}
+                  {hasError && (
+                    <View style={[styles.playingBadge, styles.errorBadge]}>
+                      <Text style={styles.playingBadgeText}>Tap to retry</Text>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -263,6 +336,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(99,179,237,0.5)', borderRadius: 10,
   },
   playingBadgeText: { fontSize: 10, color: '#FFF', fontWeight: '700' },
+
+  cardError: {
+    borderColor:     'rgba(239,68,68,0.55)',
+    backgroundColor: 'rgba(239,68,68,0.10)',
+  },
+  errorBadge: {
+    backgroundColor: 'rgba(239,68,68,0.6)',
+  },
+  errorBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(239,68,68,0.14)',
+    borderColor:     'rgba(239,68,68,0.35)',
+    borderWidth:     1,
+    borderRadius:    14,
+    padding:         12,
+    marginBottom:    18,
+  },
+  errorText: { color: '#FFF', fontSize: 12, lineHeight: 16 },
 
   /* Timer */
   timerRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
