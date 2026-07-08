@@ -1,7 +1,6 @@
 import * as Sharing from 'expo-sharing';
 import { Alert, Platform, Linking } from 'react-native';
 import { registerPositiveAction } from './rateApp';
-import { registerFriendInvite } from './featureUnlocks';
 
 const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.weatherq.app';
 const APP_URL  = null; // set when live on App Store — e.g. 'https://apps.apple.com/app/idXXXXXXXXXX'
@@ -25,8 +24,6 @@ export const shareWeatherQ = async ({ imageUri = null, cityName = null } = {}) =
   try {
     // Register as a positive action (drives smart rate prompt later)
     registerPositiveAction();
-    // Unlock Motion Card as a reward for growing WeatherQ
-    registerFriendInvite();
 
     // With image — much higher conversion (friends see the product upfront)
     if (imageUri && (await Sharing.isAvailableAsync())) {

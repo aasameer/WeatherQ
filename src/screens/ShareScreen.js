@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,6 @@ import {
   Alert,
   StyleSheet,
   StatusBar,
-  Modal,
-  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,8 +22,6 @@ import { CARD_TEMPLATES, DEFAULT_TEMPLATE } from '../constants/cardTemplates';
 import { getWeatherInfo } from '../utils/weatherHelpers';
 import { maybeShowShareInterstitial } from '../ads/AdService';
 import { registerPositiveAction } from '../utils/rateApp';
-import { isMotionCardUnlocked } from '../utils/featureUnlocks';
-import { shareWeatherQ } from '../utils/referral';
 import { TEXT, GLASS } from '../constants/colors';
 
 const FORMATS = [
@@ -39,47 +35,8 @@ const ShareScreen = ({ navigation, route }) => {
   const [format,   setFormat]   = useState('square');
   const [template, setTemplate] = useState(DEFAULT_TEMPLATE);
   const [capturing, setCapturing] = useState(false);
-  const [motionUnlocked, setMotionUnlocked] = useState(false);
-  const [unlockOpen,     setUnlockOpen]     = useState(false);
 
   const viewShotRef = useRef(null);
-
-  // Load unlock state on mount and refresh when returning to this screen
-  useEffect(() => {
-    let alive = true;
-    isMotionCardUnlocked().then((u) => alive && setMotionUnlocked(!!u));
-    const unsub = navigation.addListener('focus', () => {
-      isMotionCardUnlocked().then((u) => alive && setMotionUnlocked(!!u));
-    });
-    return () => { alive = false; unsub && unsub(); };
-  }, [navigation]);
-
-  const openMotionCard = useCallback(() => {
-    if (motionUnlocked) {
-      navigation.navigate('MotionCard', { weather, cityInfo, quote, unit });
-    } else {
-      setUnlockOpen(true);
-    }
-  }, [motionUnlocked, navigation, weather, cityInfo, quote, unit]);
-
-  const handleUnlockShare = useCallback(async () => {
-    const ok = await shareWeatherQ({ cityName: cityInfo?.city });
-    if (ok) {
-      setMotionUnlocked(true);
-      setUnlockOpen(false);
-      // Small confirmation then jump straight into the Motion Card
-      setTimeout(() => {
-        Alert.alert(
-          '🎉 Unlocked!',
-          'Motion Cards are ready. Screen-record the animated preview for Reels and TikTok.',
-          [{
-            text: 'Open Motion Card',
-            onPress: () => navigation.navigate('MotionCard', { weather, cityInfo, quote, unit }),
-          }]
-        );
-      }, 400);
-    }
-  }, [cityInfo, navigation, weather, quote, unit]);
 
   const weatherInfo = weather
     ? getWeatherInfo(weather.current.weather_code, weather.current.is_day === 1)
@@ -253,68 +210,10 @@ const ShareScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            style={[styles.motionBtn, !motionUnlocked && styles.motionBtnLocked]}
-            activeOpacity={0.85}
-            onPress={openMotionCard}
-          >
-            <Ionicons
-              name={motionUnlocked ? 'videocam-outline' : 'lock-closed-outline'}
-              size={16} color="#FFF" style={{ marginRight: 6 }}
-            />
-            <Text style={styles.motionBtnText}>
-              {motionUnlocked
-                ? 'Try Motion Card — animated for Reels & TikTok'
-                : 'Motion Card — invite 1 friend to unlock'}
-            </Text>
-          </TouchableOpacity>
-
           <Text style={styles.hint}>
             Tip: Use "Story" format for Instagram Stories, WhatsApp Status, and TikTok.
           </Text>
         </ScrollView>
-
-        {/* Unlock Motion Card modal */}
-        <Modal visible={unlockOpen} transparent animationType="fade" onRequestClose={() => setUnlockOpen(false)}>
-          <Pressable style={styles.mBackdrop} onPress={() => setUnlockOpen(false)}>
-            <Pressable style={styles.mSheet} onPress={(e) => e.stopPropagation?.()}>
-              <LinearGradient
-                colors={['#1A1A4E', '#0D0D2B']}
-                style={styles.mGradient}
-              >
-                <View style={styles.mIconWrap}>
-                  <Ionicons name="videocam" size={32} color="#63B3ED" />
-                </View>
-                <Text style={styles.mTitle}>Unlock Motion Cards</Text>
-                <Text style={styles.mBody}>
-                  Invite a friend to try WeatherQ and instantly unlock our animated
-                  card format — perfect for Instagram Reels, TikTok, and Stories.
-                </Text>
-                <View style={styles.mPerks}>
-                  <Text style={styles.mPerk}>🎥  Animated share card preview</Text>
-                  <Text style={styles.mPerk}>📱  Screen-record for social media</Text>
-                  <Text style={styles.mPerk}>💛  Unlocked forever after 1 invite</Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.mPrimaryBtn}
-                  onPress={handleUnlockShare}
-                  activeOpacity={0.85}
-                >
-                  <Ionicons name="paper-plane-outline" size={16} color="#FFF" style={{ marginRight: 6 }} />
-                  <Text style={styles.mPrimaryText}>Invite a friend now</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.mSecondaryBtn}
-                  onPress={() => setUnlockOpen(false)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.mSecondaryText}>Maybe later</Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            </Pressable>
-          </Pressable>
-        </Modal>
-
       </SafeAreaView>
     </WeatherBackground>
   );
@@ -396,57 +295,6 @@ const styles = StyleSheet.create({
   downloadBtn: { backgroundColor: GLASS.background, borderColor: GLASS.border },
   shareBtn:    { backgroundColor: 'rgba(99,179,237,0.25)', borderColor: 'rgba(99,179,237,0.5)' },
   actionText:  { fontSize: 15, fontWeight: '600', color: '#FFF' },
-  motionBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    marginTop: 12, marginBottom: 20,
-    paddingVertical: 12, borderRadius: 14,
-    backgroundColor: 'rgba(239,68,68,0.20)',
-    borderColor: 'rgba(239,68,68,0.55)', borderWidth: 1,
-  },
-  motionBtnText: { fontSize: 13, color: '#FFF', fontWeight: '600' },
-  motionBtnLocked: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderColor:     'rgba(255,255,255,0.15)',
-  },
-
-  /* Unlock modal */
-  mBackdrop: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center', alignItems: 'center', padding: 24,
-  },
-  mSheet: { width: '100%', maxWidth: 420, borderRadius: 24, overflow: 'hidden' },
-  mGradient: { padding: 24, alignItems: 'center' },
-  mIconWrap: {
-    width: 64, height: 64, borderRadius: 20,
-    backgroundColor: 'rgba(99,179,237,0.20)',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 14,
-  },
-  mTitle: { fontSize: 20, fontWeight: '800', color: '#FFF', marginBottom: 8, textAlign: 'center' },
-  mBody:  {
-    fontSize: 13, color: TEXT.accent, lineHeight: 19,
-    textAlign: 'center', marginBottom: 18,
-  },
-  mPerks: {
-    alignSelf: 'stretch',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12, padding: 14, marginBottom: 22,
-    gap: 6,
-  },
-  mPerk: { fontSize: 13, color: '#FFF' },
-  mPrimaryBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(99,179,237,0.35)',
-    borderColor: 'rgba(99,179,237,0.7)', borderWidth: 1,
-    borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20,
-    alignSelf: 'stretch',
-  },
-  mPrimaryText: { color: '#FFF', fontSize: 15, fontWeight: '700' },
-  mSecondaryBtn: {
-    marginTop: 10, alignSelf: 'stretch',
-    paddingVertical: 12, alignItems: 'center',
-  },
-  mSecondaryText: { color: TEXT.muted, fontSize: 13, fontWeight: '500' },
   hint: { fontSize: 12, color: TEXT.muted, textAlign: 'center', lineHeight: 18 },
 });
 
