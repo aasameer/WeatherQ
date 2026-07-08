@@ -7,7 +7,6 @@ import SearchScreen   from '../screens/SearchScreen';
 import ShareScreen    from '../screens/ShareScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import AboutScreen    from '../screens/AboutScreen';
-import AmbientScreen  from '../screens/AmbientScreen';
 
 const Stack = createStackNavigator();
 
@@ -24,7 +23,6 @@ const AppNavigator = () => (
       <Stack.Screen name="Home"     component={HomeScreen} />
       <Stack.Screen name="Search"   component={SearchScreen} />
       <Stack.Screen name="Share"    component={ShareScreen} />
-      <Stack.Screen name="Ambient"  component={AmbientScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="About"    component={AboutScreen} />
     </Stack.Navigator>
