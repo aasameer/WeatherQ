@@ -34,6 +34,28 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.8.2] — 2026-07-08
+
+### Fixed
+- **Ambient Sounds AVPlayer failure fix.** Some sound URLs (pixabay
+  CDN redirects) failed to load reliably on iOS AVPlayer. Player now:
+  · Tries a **primary** URL, then a **fallback** URL for each sound
+  · Never crashes — surfaces a friendly inline error banner
+  · Shows a per-card "Tap to retry" badge with red outline
+  · Loading spinner while the sound is being fetched
+  · Detects network errors vs. bad file errors and shows the right message
+- Playback status callback catches runtime errors (e.g. network drops)
+  and logs them without crashing the player.
+
+### Changed
+- Each ambient sound now has `url` (primary) + `fallback` (backup) in
+  `src/constants/ambientSounds.js`.
+- Added instructions in the sound catalogue for self-hosting MP3s at
+  `https://aasameer.github.io/sounds/<name>.mp3` if the streaming URLs
+  are ever unreliable.
+
+---
+
 ## [1.8.1] — 2026-05-28
 
 ### Added — Growth Loop
