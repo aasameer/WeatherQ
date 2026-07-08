@@ -52,7 +52,7 @@ const AboutScreen = ({ navigation }) => (
         >
           <Text style={styles.heroIcon}>⛅</Text>
           <Text style={styles.heroName}>WeatherQ</Text>
-          <Text style={styles.heroVersion}>Version 1.8.3</Text>
+          <Text style={styles.heroVersion}>Version 1.8.4</Text>
           <Text style={styles.heroTagline}>Weather that speaks to you</Text>
         </LinearGradient>
 

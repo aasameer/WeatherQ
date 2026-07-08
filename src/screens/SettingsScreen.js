@@ -652,15 +652,9 @@ const SettingsScreen = ({ navigation }) => {
             />
           </View>
 
-          {/* Ambient + Share */}
+          {/* Extras */}
           <SectionHeader title="Extras" />
           <View style={styles.card}>
-            <SettingsRow
-              icon="musical-notes-outline"
-              label="Ambient Sounds"
-              subtitle="Rain, ocean, fireplace — for focus & sleep"
-              onPress={() => navigation.navigate('Ambient')}
-            />
             <SettingsRow
               icon="paper-plane-outline"
               label="Invite Friends"
