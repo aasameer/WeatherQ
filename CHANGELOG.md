@@ -34,6 +34,25 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.8.4] — 2026-07-08
+
+### Removed — Ambient Sounds
+- Ambient Sounds feature removed. Streaming MP3 URLs from third-party
+  CDNs proved unreliable across iOS AVPlayer, and bundling MP3 assets
+  wasn't in scope. Better to ship what works than half a feature.
+- Deleted `src/screens/AmbientScreen.js`
+- Deleted `src/constants/ambientSounds.js`
+- Uninstalled `expo-av` (no other feature was using it)
+- Removed the `Ambient` route from AppNavigator
+- Settings → Extras now contains just "Invite Friends"
+
+If you ever want to add reliable ambient sounds later, the pattern is:
+  1. Bundle 6 MP3 files in `assets/sounds/` via `require()`
+  2. Reinstall `expo-av`
+  3. Rebuild AmbientScreen with the bundled sources — no streaming needed
+
+---
+
 ## [1.8.3] — 2026-07-08
 
 ### Removed
