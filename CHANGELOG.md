@@ -34,6 +34,27 @@ Format: [Semantic Versioning](https://semver.org) — MAJOR.MINOR.PATCH
 
 ---
 
+## [1.8.3] — 2026-07-08
+
+### Removed
+- **Motion Card feature removed.** Real GIF/MP4 encoding in Expo
+  requires slow (~30s) pure-JS encoders, and the screen-recording
+  workaround was a poor UX (users had to manually manage native
+  OS screen recording). Neither path was worth shipping.
+- Deleted `src/screens/MotionCardScreen.js`
+- Deleted `src/utils/featureUnlocks.js` (the unlock/gating state)
+- Removed the Motion Card button + unlock modal from ShareScreen
+- Removed `MotionCard` route from AppNavigator
+- Removed `registerFriendInvite()` from the referral flow — sharing
+  the app remains as a normal, always-available feature (no gating)
+
+### Kept
+- All ambient sounds, invite friends, smart rate, share card templates,
+  etc. — everything else from v1.8.x is intact.
+- The static share card already looks great and continues to work.
+
+---
+
 ## [1.8.2] — 2026-07-08
 
 ### Fixed

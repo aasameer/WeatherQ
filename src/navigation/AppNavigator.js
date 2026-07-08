@@ -2,13 +2,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import HomeScreen       from '../screens/HomeScreen';
-import SearchScreen     from '../screens/SearchScreen';
-import ShareScreen      from '../screens/ShareScreen';
-import SettingsScreen   from '../screens/SettingsScreen';
-import AboutScreen      from '../screens/AboutScreen';
-import AmbientScreen    from '../screens/AmbientScreen';
-import MotionCardScreen from '../screens/MotionCardScreen';
+import HomeScreen     from '../screens/HomeScreen';
+import SearchScreen   from '../screens/SearchScreen';
+import ShareScreen    from '../screens/ShareScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import AboutScreen    from '../screens/AboutScreen';
+import AmbientScreen  from '../screens/AmbientScreen';
 
 const Stack = createStackNavigator();
 
@@ -22,13 +21,12 @@ const AppNavigator = () => (
         gestureEnabled: true,
       }}
     >
-      <Stack.Screen name="Home"       component={HomeScreen} />
-      <Stack.Screen name="Search"     component={SearchScreen} />
-      <Stack.Screen name="Share"      component={ShareScreen} />
-      <Stack.Screen name="MotionCard" component={MotionCardScreen} />
-      <Stack.Screen name="Ambient"    component={AmbientScreen} />
-      <Stack.Screen name="Settings"   component={SettingsScreen} />
-      <Stack.Screen name="About"      component={AboutScreen} />
+      <Stack.Screen name="Home"     component={HomeScreen} />
+      <Stack.Screen name="Search"   component={SearchScreen} />
+      <Stack.Screen name="Share"    component={ShareScreen} />
+      <Stack.Screen name="Ambient"  component={AmbientScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="About"    component={AboutScreen} />
     </Stack.Navigator>
   </NavigationContainer>
 );
